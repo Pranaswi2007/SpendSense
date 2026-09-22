@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Smart Personal Finance</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="landing.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="landing-body">
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="landing-nav" id="mainNav">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <span class="logo-icon">💸</span>
+        <span class="logo-text">SpendSense</span>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="auth.html" class="btn btn-primary btn-sm">Get Started</a></li>
+      </ul>
+      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero-section">
+    <div class="hero-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-container">
+      <div class="hero-content fade-in">
+        <div class="hero-badge">
+          <span>🚀</span> Smart Finance for the Modern Age
+        </div>
+        <h1 class="hero-title">
+          Take Control of <br/>
+          <span class="gradient-text">Your Money</span>
+        </h1>
+        <p class="hero-subtitle">
+          SpendSense connects to your bank accounts, tracks every rupee, alerts you before you overspend, and helps you build a smarter financial future — all in one place.
+        </p>
+        <div class="hero-actions">
+          <a href="auth.html" class="btn btn-primary btn-lg">
+            <i class="fas fa-rocket"></i> Start Free Today
+          </a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg">
+            <i class="fas fa-play-circle"></i> See How It Works
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">50K+</span>
+            <span class="hero-stat-label">Active Users</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">₹2Cr+</span>
+            <span class="hero-stat-label">Savings Tracked</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">99.9%</span>
+            <span class="hero-stat-label">Uptime</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual fade-in">
+        <div class="dashboard-preview">
+          <div class="preview-header">
+            <div class="preview-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="preview-title">SpendSense Dashboard</span>
+          </div>
+          <div class="preview-body">
+            <div class="preview-balance">
+              <div class="preview-label">Total Balance</div>
+              <div class="preview-value">₹1,24,560</div>
+            </div>
+            <div class="preview-bars">
+              <div class="preview-bar-item">
+                <span>🍔 Food</span>
+                <div class="preview-bar"><div class="preview-bar-fill" style="width:72%; background: #FF6B6B"></div></div>
+                <span>72%</span>
+              </div>
+              <div class="preview-bar-item">
+                <span>🎬 Entertainment</span>
+                <div class="preview-bar"><div class="preview-bar-fill" style="width:45%; background: #6C63FF"></div></div>
+                <span>45%</span>
+              </div>
+              <div class="preview-bar-item">
+                <span>🛒 Shopping</span>
+                <div class="preview-bar"><div class="preview-bar-fill" style="width:88%; background: #FFB347"></div></div>
+                <span>88%</span>
+              </div>
+              <div class="preview-bar-item">
+                <span>📺 Subscriptions</span>
+                <div class="preview-bar"><div class="preview-bar-fill" style="width:33%; background: #38F9D7"></div></div>
+                <span>33%</span>
+              </div>
+            </div>
+            <div class="preview-alert">
+              <i class="fas fa-exclamation-triangle"></i>
+              Shopping budget at 88%! Consider reducing spend.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="features-section" id="features">
+    <div class="section-container">
+      <div class="section-label">FEATURES</div>
+      <h2 class="section-heading">Everything You Need to <span class="gradient-text">Save More</span></h2>
+      <p class="section-desc">A complete toolkit to manage, track, and optimize your personal finances.</p>
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(108,99,255,0.15); color: #8B85FF;">
+            <i class="fas fa-link"></i>
+          </div>
+          <h3>Bank Account Linking</h3>
+          <p>Securely connect your bank accounts and get real-time transaction updates. Supports all major Indian banks.</p>
+        </div>
+
+        <div class="feature-card featured">
+          <div class="feature-icon" style="background: rgba(67,233,123,0.15); color: #43E97B;">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <h3>Expense Tracking</h3>
+          <p>Auto-categorize your spending into Food, Shopping, Entertainment, Subscriptions, Transport, and more.</p>
+          <span class="feature-tag">Most Popular</span>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(255,179,71,0.15); color: #FFB347;">
+            <i class="fas fa-bell"></i>
+          </div>
+          <h3>Budget Alerts</h3>
+          <p>Get instant alerts when you're nearing or exceeding your budget limits. Stay in control, always.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(255,101,132,0.15); color: #FF6584;">
+            <i class="fas fa-credit-card"></i>
+          </div>
+          <h3>Pay from App</h3>
+          <p>Pay bills, EMIs, and reminders directly from SpendSense — no need to switch between apps.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(56,249,215,0.15); color: #38F9D7;">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h3>Smart Insights</h3>
+          <p>AI-powered suggestions on where to cut costs, what to save, and how to reach your financial goals faster.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(150,100,255,0.15); color: #9B6DFF;">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>Bank-Grade Security</h3>
+          <p>256-bit encryption and multi-factor authentication keep your financial data completely safe.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="how-section" id="how-it-works">
+    <div class="section-container">
+      <div class="section-label">HOW IT WORKS</div>
+      <h2 class="section-heading">Get Started in <span class="gradient-text">3 Simple Steps</span></h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <div class="step-icon"><i class="fas fa-user-plus"></i></div>
+          <h3>Create Account</h3>
+          <p>Sign up in seconds. No credit card required. Just your email and a password.</p>
+        </div>
+        <div class="step-connector"><i class="fas fa-arrow-right"></i></div>
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <div class="step-icon"><i class="fas fa-magic"></i></div>
+          <h3>Plan Your Budget</h3>
+          <p>Tell us your salary and spending categories. Our smart planner builds a personalized budget in seconds.</p>
+        </div>
+        <div class="step-connector"><i class="fas fa-arrow-right"></i></div>
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <div class="step-icon"><i class="fas fa-chart-line"></i></div>
+          <h3>Track & Save</h3>
+          <p>Watch your expenses in real time, get alerts, and start saving smarter every month.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CATEGORIES ===== -->
+  <section class="categories-section">
+    <div class="section-container">
+      <div class="section-label">EXPENSE CATEGORIES</div>
+      <h2 class="section-heading">Track <span class="gradient-text">Every Category</span></h2>
+      <div class="categories-grid">
+        <div class="cat-chip"><span>🍔</span> Food & Dining</div>
+        <div class="cat-chip"><span>🎬</span> Entertainment</div>
+        <div class="cat-chip"><span>🛒</span> Shopping</div>
+        <div class="cat-chip"><span>📺</span> Subscriptions</div>
+        <div class="cat-chip"><span>🚗</span> Transport</div>
+        <div class="cat-chip"><span>🏥</span> Healthcare</div>
+        <div class="cat-chip"><span>💡</span> Utilities</div>
+        <div class="cat-chip"><span>✈️</span> Travel</div>
+        <div class="cat-chip"><span>📚</span> Education</div>
+        <div class="cat-chip"><span>💰</span> Investments</div>
+        <div class="cat-chip"><span>🏠</span> Rent & EMI</div>
+        <div class="cat-chip"><span>🎁</span> Gifts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta-section">
+    <div class="cta-bg-shape"></div>
+    <div class="section-container">
+      <div class="cta-content">
+        <h2>Ready to <span class="gradient-text">SpendSense</span>?</h2>
+        <p>Join thousands of Indians who have already taken control of their finances.</p>
+        <a href="auth.html" class="btn btn-primary btn-lg">
+          <i class="fas fa-rocket"></i> Start For Free
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="landing-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="nav-logo" style="margin-bottom:12px">
+          <span class="logo-icon">💸</span>
+          <span class="logo-text">SpendSense</span>
+        </div>
+        <p>Smart money management for every Indian household.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#">Features</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Careers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 SpendSense. All rights reserved. Made with ❤️ in India.</p>
+    </div>
+  </footer>
+
+  <!-- ===== LOGIN MODAL ===== -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Welcome Back 👋</h2>
+        <button class="modal-close" onclick="closeModal('loginModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" placeholder="you@example.com" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" placeholder="Enter your password" required/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <p style="text-align:center; margin-top:16px; font-size:0.85rem; color:var(--text-muted)">
+          Don't have an account? <a href="auth.html" style="color:var(--primary-light)">Sign up free</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('mainNav');
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Hamburger menu
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      window.location.href = 'auth.html';
+    }
+
+    // Animate elements on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.feature-card, .step-card, .cat-chip').forEach(el => {
+      el.classList.add('observe');
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

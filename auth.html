@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Sign In</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { background: var(--dark-bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+    .auth-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* LEFT PANEL */
+    .auth-left {
+      background: linear-gradient(145deg, #0F0E17 0%, #1A1A2E 60%, #16213E 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-left::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -120px;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: rgba(108,99,255,0.12);
+      filter: blur(60px);
+    }
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -80px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(255,101,132,0.08);
+      filter: blur(50px);
+    }
+    .auth-brand {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.8rem; font-weight: 800;
+      margin-bottom: 48px;
+      position: relative; z-index: 1;
+    }
+    .auth-brand .logo-icon { font-size: 2rem; }
+    .auth-brand .logo-text {
+      background: var(--gradient-1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .auth-headline {
+      font-size: 2.4rem; font-weight: 800; line-height: 1.15;
+      margin-bottom: 20px; position: relative; z-index: 1;
+    }
+    .auth-sub {
+      font-size: 1rem; color: var(--text-muted); line-height: 1.7;
+      max-width: 380px; margin-bottom: 40px; position: relative; z-index: 1;
+    }
+    .auth-features { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 1; }
+    .auth-feature-item {
+      display: flex; align-items: center; gap: 14px;
+      font-size: 0.9rem; color: var(--text-muted);
+    }
+    .auth-feature-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .auth-stats {
+      display: flex; gap: 32px; margin-top: 48px;
+      padding-top: 32px; border-top: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+    .auth-stat-val { font-size: 1.4rem; font-weight: 800; font-family: 'Poppins', sans-serif; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .auth-stat-lbl { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* RIGHT PANEL */
+    .auth-right {
+      background: var(--card-bg);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 60px 48px;
+    }
+    .auth-card { width: 100%; max-width: 400px; }
+    .auth-tabs {
+      display: flex; gap: 4px;
+      background: var(--card-light);
+      border-radius: 50px; padding: 4px;
+      margin-bottom: 32px;
+    }
+    .auth-tab {
+      flex: 1; padding: 10px 20px;
+      border: none; border-radius: 50px;
+      background: transparent; color: rgba(252,241,208,0.70);
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: var(--transition);
+      font-family: 'Inter', sans-serif;
+    }
+    .auth-tab.active { background: var(--cream); color: var(--navy); box-shadow: 0 2px 10px rgba(0,0,0,0.20); }
+
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+
+    .auth-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+    .auth-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
+
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap .input-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dark); font-size: 0.9rem;
+    }
+    .input-icon-wrap .form-control { padding-left: 40px; }
+    .input-icon-wrap .input-eye {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dark); cursor: pointer; font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .input-icon-wrap .input-eye:hover { color: var(--primary-light); }
+    .input-icon-wrap .form-control.with-eye { padding-right: 40px; }
+
+    .strength-bar { display: flex; gap: 4px; margin-top: 8px; }
+    .strength-seg { flex: 1; height: 4px; border-radius: 50px; background: rgba(255,255,255,0.08); transition: background 0.3s; }
+    .strength-label { font-size: 0.72rem; margin-top: 4px; }
+
+    .form-error { font-size: 0.75rem; color: var(--danger); margin-top: 4px; display: none; }
+    .form-group.has-error .form-control { border-color: var(--danger); }
+    .form-group.has-error .form-error { display: block; }
+
+    .auth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .auth-divider span { font-size: 0.78rem; color: var(--text-dark); white-space: nowrap; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .social-btn {
+      width: 100%; padding: 11px;
+      background: var(--card-light); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-muted);
+      font-size: 0.85rem; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: var(--transition); font-family: 'Inter', sans-serif;
+      margin-bottom: 10px;
+    }
+    .social-btn:hover { border-color: var(--primary); color: var(--text); background: rgba(108,99,255,0.08); }
+
+    .auth-footer-text { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 20px; }
+    .auth-footer-text a { color: var(--primary-light); font-weight: 600; }
+
+    .avatar-picker { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .avatar-opt {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; cursor: pointer;
+      border: 2px solid transparent; transition: var(--transition);
+    }
+    .avatar-opt:hover, .avatar-opt.selected { border-color: var(--primary); transform: scale(1.1); }
+
+    @media (max-width: 768px) {
+      .auth-wrapper { grid-template-columns: 1fr; }
+      .auth-left { display: none; }
+      .auth-right { padding: 40px 24px; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+<div class="auth-wrapper">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <span class="logo-icon">💸</span>
+      <span class="logo-text">SpendSense</span>
+    </div>
+    <h1 class="auth-headline">Smart Money,<br/><span class="gradient-text">Smarter You.</span></h1>
+    <p class="auth-sub">Track every rupee, stay within budget, and build the financial future you deserve — all in one beautiful app.</p>
+    <div class="auth-features">
+      <div class="auth-feature-item">
+        <div class="auth-feature-icon" style="background:rgba(108,99,255,0.15);color:var(--primary-light)"><i class="fas fa-chart-pie"></i></div>
+        <span>Auto-categorize spending across 12 categories</span>
+      </div>
+      <div class="auth-feature-item">
+        <div class="auth-feature-icon" style="background:rgba(67,233,123,0.15);color:var(--accent)"><i class="fas fa-bell"></i></div>
+        <span>Smart budget alerts before you overspend</span>
+      </div>
+      <div class="auth-feature-item">
+        <div class="auth-feature-icon" style="background:rgba(255,179,71,0.15);color:var(--warning)"><i class="fas fa-magic"></i></div>
+              <span>Smart budget planner — we plan your budget from your salary</span>
+      </div>
+      <div class="auth-feature-item">
+        <div class="auth-feature-icon" style="background:rgba(255,101,132,0.15);color:var(--secondary)"><i class="fas fa-bullseye"></i></div>
+        <span>Set savings goals and track your progress</span>
+      </div>
+    </div>
+    <div class="auth-stats">
+      <div><div class="auth-stat-val">10K+</div><div class="auth-stat-lbl">Active Users</div></div>
+      <div><div class="auth-stat-val">₹50L+</div><div class="auth-stat-lbl">Savings Tracked</div></div>
+      <div><div class="auth-stat-val">4.0★</div><div class="auth-stat-lbl">User Rating</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+    <div class="auth-card">
+
+      <!-- TABS -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">Create Account</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div class="auth-form active" id="loginForm">
+        <h2 class="auth-title">Welcome back 👋</h2>
+        <p class="auth-subtitle">Sign in to continue to your dashboard</p>
+        <form onsubmit="handleLogin(event)" novalidate>
+          <div class="form-group" id="lg-email-grp">
+            <label class="form-label">Email Address</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" class="form-control" id="lgEmail" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+            <div class="form-error" id="lg-email-err">Please enter a valid email.</div>
+          </div>
+          <div class="form-group" id="lg-pass-grp">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              Password
+              <a href="#" onclick="showForgotPassword()" style="font-size:0.78rem;color:var(--primary-light);font-weight:500">Forgot password?</a>
+            </label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" class="form-control with-eye" id="lgPass" placeholder="Enter your password" autocomplete="current-password"/>
+              <i class="fas fa-eye input-eye" onclick="togglePwd('lgPass',this)"></i>
+            </div>
+            <div class="form-error" id="lg-pass-err">Incorrect password or account not found.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+            <input type="checkbox" id="rememberMe" style="accent-color:var(--primary)"/>
+            <label for="rememberMe" style="font-size:0.82rem;color:var(--text-muted);cursor:pointer">Remember me</label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+        </form>
+        <div class="auth-divider"><span>or continue with</span></div>
+        <button class="social-btn" onclick="demoLogin()">
+          <span>🚀</span> Try Demo Account
+        </button>
+        <p class="auth-footer-text">
+          Don't have an account? <a href="#" onclick="switchAuthTab('signup')">Sign up free</a>
+        </p>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div class="auth-form" id="signupForm">
+        <h2 class="auth-title">Create your account ✨</h2>
+        <p class="auth-subtitle">Start managing your finances smarter today</p>
+        <form onsubmit="handleSignup(event)" novalidate>
+          <div class="grid-2" style="gap:14px">
+            <div class="form-group" id="sg-fname-grp">
+              <label class="form-label">First Name</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" class="form-control" id="sgFname" placeholder="Rahul" autocomplete="given-name"/>
+              </div>
+              <div class="form-error" id="sg-fname-err">Enter your first name.</div>
+            </div>
+            <div class="form-group" id="sg-lname-grp">
+              <label class="form-label">Last Name</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" class="form-control" id="sgLname" placeholder="Kumar" autocomplete="family-name"/>
+              </div>
+              <div class="form-error" id="sg-lname-err">Enter your last name.</div>
+            </div>
+          </div>
+          <div class="form-group" id="sg-email-grp">
+            <label class="form-label">Email Address</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" class="form-control" id="sgEmail" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+            <div class="form-error" id="sg-email-err">Please enter a valid email.</div>
+          </div>
+          <div class="form-group" id="sg-phone-grp">
+            <label class="form-label">Phone Number</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-phone input-icon"></i>
+              <input type="tel" class="form-control" id="sgPhone" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel"/>
+            </div>
+            <div class="form-error" id="sg-phone-err">Enter a valid 10-digit number.</div>
+          </div>
+          <div class="form-group" id="sg-pass-grp">
+            <label class="form-label">Password</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" class="form-control with-eye" id="sgPass" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password"/>
+              <i class="fas fa-eye input-eye" onclick="togglePwd('sgPass',this)"></i>
+            </div>
+            <div class="strength-bar" id="strengthBar">
+              <div class="strength-seg" id="s1"></div>
+              <div class="strength-seg" id="s2"></div>
+              <div class="strength-seg" id="s3"></div>
+              <div class="strength-seg" id="s4"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel" style="color:var(--text-dark)"></div>
+            <div class="form-error" id="sg-pass-err">Password must be at least 8 characters.</div>
+          </div>
+          <div class="form-group" id="sg-cpass-grp">
+            <label class="form-label">Confirm Password</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" class="form-control with-eye" id="sgCpass" placeholder="Repeat password" autocomplete="new-password"/>
+              <i class="fas fa-eye input-eye" onclick="togglePwd('sgCpass',this)"></i>
+            </div>
+            <div class="form-error" id="sg-cpass-err">Passwords do not match.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:20px">
+            <input type="checkbox" id="termsCheck" style="accent-color:var(--primary);margin-top:3px" required/>
+            <label for="termsCheck" style="font-size:0.8rem;color:var(--text-muted);cursor:pointer;line-height:1.5">
+              I agree to the <a href="#" style="color:var(--primary-light)">Terms of Service</a> and
+              <a href="#" style="color:var(--primary-light)">Privacy Policy</a>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="signupBtn">
+            <i class="fas fa-rocket"></i> Create Account
+          </button>
+        </form>
+        <p class="auth-footer-text">
+          Already have an account? <a href="#" onclick="switchAuthTab('login')">Sign in</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h2 class="modal-title">🔑 Reset Password</h2>
+      <button class="modal-close" onclick="closeModal('forgotModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px">Enter your registered email. We'll send a reset link.</p>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <div class="input-icon-wrap">
+        <i class="fas fa-envelope input-icon"></i>
+        <input type="email" class="form-control" id="forgotEmail" placeholder="you@example.com"/>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="sendResetLink()">
+      <i class="fas fa-paper-plane"></i> Send Reset Link
+    </button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // Inline utils needed before auth.js
+  function showToast(msg, type = 'info', dur = 3500) {
+    const c = document.getElementById('toastContainer');
+    const icons = { success:'✅', warning:'⚠️', danger:'❌', info:'ℹ️' };
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.animation = 'slideOutRight 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, dur);
+  }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  function openModal(id)  { document.getElementById(id).classList.add('active'); }
+
+  // If already logged in, redirect
+  const sess = localStorage.getItem('ss_session');
+  if (sess) {
+    try { const s = JSON.parse(sess); if (s.uid) window.location.href = 'dashboard.html'; } catch(e) {}
+  }
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

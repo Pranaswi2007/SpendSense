@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Tips & Insights</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">💸 SpendSense</div>
+      <div class="logo-sub">Smart Finance</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="dashboard.html"><span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon"><i class="fas fa-receipt"></i></span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon"><i class="fas fa-wallet"></i></span> Budget</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="goals.html"><span class="nav-icon"><i class="fas fa-bullseye"></i></span> Goals</a>
+      <a href="tips.html" class="active"><span class="nav-icon"><i class="fas fa-lightbulb"></i></span> Tips</a>
+      <div class="nav-section-title">Account</div>
+      <a href="settings.html"><span class="nav-icon"><i class="fas fa-cog"></i></span> Settings</a>
+      <a href="#" onclick="logout()"><span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar user-avatar-init">U</div>
+      <div class="user-info">
+        <div class="name" id="sidebarUserName">User</div>
+        <div class="role" id="sidebarUserRole">Free Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <div class="topbar-title">Tips & Insights</div>
+          <div class="topbar-subtitle">Smart advice based on your spending habits</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a href="dashboard.html" class="notification-btn" title="Dashboard"><i class="fas fa-home"></i></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- SAVINGS HEALTH BANNER -->
+      <div id="insightBanner" style="margin-bottom:24px"></div>
+
+      <!-- GOAL-BASED SUGGESTIONS -->
+      <div id="goalSuggestionsSection" style="margin-bottom:32px"></div>
+
+      <!-- YOUR SPENDING ANALYSIS -->
+      <div id="spendingAnalysis" style="margin-bottom:32px"></div>
+
+      <!-- FILTER CHIPS -->
+      <div class="section-header" style="margin-bottom:14px">
+        <div class="section-title">💡 Money Tips</div>
+      </div>
+      <div class="chip-group" style="margin-bottom:20px">
+        <div class="chip active" onclick="filterTips(this,'all')">✨ All</div>
+        <div class="chip" onclick="filterTips(this,'saving')">💰 Saving</div>
+        <div class="chip" onclick="filterTips(this,'budgeting')">📊 Budgeting</div>
+        <div class="chip" onclick="filterTips(this,'investing')">📈 Investing</div>
+        <div class="chip" onclick="filterTips(this,'spending')">🛒 Spending</div>
+        <div class="chip" onclick="filterTips(this,'debt')">💳 Debt-Free</div>
+        <div class="chip" onclick="filterTips(this,'india')">🇮🇳 India-Specific</div>
+      </div>
+
+      <!-- TIPS GRID -->
+      <div id="tipsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;margin-bottom:36px"></div>
+
+      <!-- GOLDEN RULES -->
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title">📐 Golden Financial Rules</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:36px">
+
+        <div class="card" style="border-top:4px solid var(--cream)">
+          <div style="font-size:2rem;font-weight:800;font-family:'Poppins',sans-serif;color:var(--cream);margin-bottom:8px">50/30/20</div>
+          <h3 style="font-size:0.95rem;margin-bottom:8px">The 50/30/20 Rule</h3>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            Spend <strong style="color:#A8E6BF">50%</strong> on needs (rent, food, utilities),
+            <strong style="color:#F0BC78">30%</strong> on wants (entertainment, dining out),
+            save <strong style="color:#A8E6BF">20%</strong>. The simplest budget framework that works at any income.
+          </p>
+          <div id="rule5030" style="margin-top:12px"></div>
+        </div>
+
+        <div class="card" style="border-top:4px solid #A8E6BF">
+          <div style="font-size:2rem;font-weight:800;font-family:'Poppins',sans-serif;color:#A8E6BF;margin-bottom:8px">6×</div>
+          <h3 style="font-size:0.95rem;margin-bottom:8px">Emergency Fund Rule</h3>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            Keep at least <strong style="color:#A8E6BF">6 months</strong> of expenses in a liquid savings account. Protects you from job loss, medical emergencies, or unexpected bills.
+          </p>
+          <div id="emergencyTarget" style="margin-top:12px"></div>
+        </div>
+
+        <div class="card" style="border-top:4px solid #F0BC78">
+          <div style="font-size:2rem;font-weight:800;font-family:'Poppins',sans-serif;color:#F0BC78;margin-bottom:8px">10%</div>
+          <h3 style="font-size:0.95rem;margin-bottom:8px">Pay Yourself First</h3>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            On payday, transfer <strong style="color:#F0BC78">10% of your salary</strong> to savings before spending anything. If you wait till the end of the month, there's nothing left.
+          </p>
+          <div id="payFirst" style="margin-top:12px"></div>
+        </div>
+
+        <div class="card" style="border-top:4px solid #F0A0A0">
+          <div style="font-size:2rem;font-weight:800;font-family:'Poppins',sans-serif;color:#F0A0A0;margin-bottom:8px">24h</div>
+          <h3 style="font-size:0.95rem;margin-bottom:8px">24-Hour Purchase Rule</h3>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            Before any non-essential purchase over <strong style="color:#F0A0A0">₹2,000</strong>, wait 24 hours. Studies show 70% of impulse urges disappear by the next day.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- DID YOU KNOW -->
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title">🧠 Did You Know?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+
+        <div class="card" style="padding:18px;border-left:3px solid #F0BC78">
+          <div style="font-size:1.6rem;margin-bottom:8px">☕</div>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            Skipping one ₹200 coffee per day saves <strong style="color:#A8E6BF">₹72,000 per year</strong>. That's a full international trip.
+          </p>
+        </div>
+
+        <div class="card" style="padding:18px;border-left:3px solid #A0CCE8">
+          <div style="font-size:1.6rem;margin-bottom:8px">📱</div>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            The average Indian professional pays for <strong style="color:#F0BC78">3–4 unused subscriptions</strong> every month — that's ₹500–₹2,000 wasted.
+          </p>
+        </div>
+
+        <div class="card" style="padding:18px;border-left:3px solid #A8E6BF">
+          <div style="font-size:1.6rem;margin-bottom:8px">📈</div>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            ₹5,000/month SIP at 12% annual returns grows to <strong style="color:#A8E6BF">₹1.75 Crore in 20 years</strong>. Start today — time is the real multiplier.
+          </p>
+        </div>
+
+        <div class="card" style="padding:18px;border-left:3px solid #D4A8E8">
+          <div style="font-size:1.6rem;margin-bottom:8px">🛒</div>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            Shopping with a grocery list reduces impulse purchases by <strong style="color:#A8E6BF">up to 40%</strong>. Takes 2 minutes, saves thousands.
+          </p>
+        </div>
+
+        <div class="card" style="padding:18px;border-left:3px solid #F0A0A0">
+          <div style="font-size:1.6rem;margin-bottom:8px">💳</div>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            Credit card interest rates in India range from <strong style="color:#F0A0A0">36–42% per year</strong>. Paying only the minimum keeps you in debt for years.
+          </p>
+        </div>
+
+        <div class="card" style="padding:18px;border-left:3px solid #F0BC78">
+          <div style="font-size:1.6rem;margin-bottom:8px">🏠</div>
+          <p style="font-size:0.80rem;color:var(--text-muted);line-height:1.65">
+            Your rent or EMI should ideally be <strong style="color:#F0BC78">under 30% of your take-home salary</strong>. Above that, you're housing-cost burdened.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="auth.js"></script>
+<script src="utils.js"></script>
+<script>
+
+/* ---- TIPS DATA ---- */
+const ALL_TIPS = [
+  // Saving
+  { cat:'saving',    icon:'🐷', title:'Automate Your Savings',         text:'Set up an auto-transfer on salary day before you can spend it. Even ₹2,000/month adds up to ₹24,000+ in a year — without noticing it.', tag:'High Impact' },
+  { cat:'saving',    icon:'⚡', title:'Cut Your Electricity Bill',      text:'Set AC to 24°C, use LED bulbs, unplug chargers when not in use. Average household saves ₹600–₹1,500/month with these small changes.', tag:'Easy Win' },
+  { cat:'saving',    icon:'🎁', title:'Budget for Fun — Seriously',     text:'Set a fixed guilt-free "fun money" amount each month. When it\'s gone, it\'s gone. This prevents the all-or-nothing trap that kills budgets.', tag:'Mindset' },
+  { cat:'saving',    icon:'📦', title:'Generic Brands Save Thousands',  text:'Store-brand groceries and household products are often made in the same factories as premium brands. Switch 50% of purchases and save 20–40%.', tag:'Smart Shopping' },
+  { cat:'saving',    icon:'🍱', title:'Meal Prep = ₹4,000+ Saved',      text:'Prepping 5 weekday lunches on Sunday costs ₹100–₹150 per meal vs ₹200–₹400 for ordering. That\'s ₹3,000–₹6,000 saved every month.', tag:'Food' },
+
+  // Budgeting
+  { cat:'budgeting', icon:'📊', title:'Try Zero-Based Budgeting',       text:'Assign every rupee of income a job at the start of the month. Income minus all allocations should equal zero. No rupee left unaccounted.', tag:'Advanced' },
+  { cat:'budgeting', icon:'📅', title:'Weekly 10-Minute Money Review',  text:'Every Sunday, spend 10 minutes checking last week\'s expenses. Just seeing where you overspent creates automatic self-correction.', tag:'Habit' },
+  { cat:'budgeting', icon:'📋', title:'Separate Needs from Wants',      text:'Before every purchase, ask: "Is this a need or a want?" Needs = non-negotiable. Wants = optional. Clarity here transforms spending.', tag:'Beginner' },
+  { cat:'budgeting', icon:'🗓️', title:'Annual Expenses Need Monthly Budget', text:'Divide annual costs (insurance, car service, fees) by 12 and set that aside monthly. No more "surprise" big bills that wreck your budget.', tag:'Pro Tip' },
+
+  // Investing
+  { cat:'investing', icon:'📈', title:'Start a SIP — Even ₹500/Month',  text:'A Systematic Investment Plan in an index fund beats savings accounts dramatically. ₹1,000/month at 12% for 10 years = ₹2.3 lakh. Start small, start now.', tag:'Wealth Builder' },
+  { cat:'investing', icon:'🏦', title:'Emergency Fund Before Investing', text:'Keep 3–6 months of expenses in a liquid savings account before putting money in stocks or mutual funds. Without this, any emergency forces you to sell investments.', tag:'Foundation' },
+  { cat:'investing', icon:'💰', title:'Invest Your Salary Increment',   text:'When you get a hike, increase your SIP by the same %. You\'re already used to your old salary — the extra should work for your future.', tag:'Growth Hack' },
+  { cat:'investing', icon:'🧾', title:'Use Tax-Saving Investments',     text:'ELSS mutual funds, PPF, NPS, and health insurance premiums save tax under Section 80C. ₹1.5 lakh invested = up to ₹46,800 saved in taxes (30% bracket).', tag:'India' },
+
+  // Spending
+  { cat:'spending',  icon:'🛍️', title:'Audit Your Subscriptions Now', text:'OTT, music, apps, gym — list every recurring charge. Cancel anything unused in the last 30 days. Most people recover ₹500–₹2,500/month this way.', tag:'Quick Win' },
+  { cat:'spending',  icon:'🛒', title:'Never Shop Hungry or Bored',    text:'Hunger and boredom are the top triggers for impulse buying — in stores and online. Eat before shopping. Close shopping apps when bored.', tag:'Psychology' },
+  { cat:'spending',  icon:'📵', title:'Delete Shopping Apps for a Week',text:'The friction of re-downloading an app is often enough to kill an impulse purchase. Try it — many people report saving ₹1,000–₹3,000 in one week.', tag:'Experiment' },
+
+  // Debt-free
+  { cat:'debt',      icon:'💳', title:'Avalanche Method: Fastest Debt Payoff', text:'List debts by interest rate (highest first). Pay minimums on all, then put every extra rupee on the highest-rate debt. Mathematically saves the most interest.', tag:'Debt-Free' },
+  { cat:'debt',      icon:'🔄', title:'Consolidate Credit Card Debt',  text:'A personal loan at 14–18% is cheaper than credit card debt at 36–42%. Consolidating can cut your interest burden in half.', tag:'Save Interest' },
+  { cat:'debt',      icon:'🚫', title:'Stop Using Credit for Wants',   text:'Use your credit card only for planned purchases you can pay in full on due date. If you can\'t pay in full, it means you can\'t afford it.', tag:'Mindset' },
+
+  // India-specific
+  { cat:'india',     icon:'🇮🇳', title:'UPI Cashback & Offers',        text:'PhonePe, GPay, and Paytm regularly offer cashback on utility payments, movie tickets, and food orders. 5 minutes of checking can save ₹100–₹500 per transaction.', tag:'India' },
+  { cat:'india',     icon:'🏥', title:'Get a Health Insurance First',   text:'A single hospitalisation without insurance can wipe out years of savings. A basic ₹5 lakh cover for a 25-year-old costs just ₹6,000–₹8,000 per year.', tag:'India' },
+  { cat:'india',     icon:'📮', title:'Post Office Schemes = Safe Returns', text:'Post Office Recurring Deposits and the Senior Citizens Savings Scheme offer 6.5–8% guaranteed returns — higher than most bank FDs, zero risk.', tag:'India' },
+  { cat:'india',     icon:'💼', title:'EPF: Don\'t Withdraw Early',    text:'Your Employee Provident Fund earns 8.1–8.5% tax-free. Withdrawing for non-emergencies restarts the compounding clock. Let it grow — it\'s your retirement core.', tag:'India' },
+];
+
+const CAT_DISPLAY = {
+  food:'Food & Dining', entertainment:'Entertainment', shopping:'Shopping',
+  subscriptions:'Subscriptions', transport:'Transport', health:'Healthcare',
+  utilities:'Utilities', rent:'Rent', emi:'EMI / Loan', insurance:'Insurance', other:'Other'
+};
+
+const CAT_REDUCTION_TIPS = {
+  food:          'cook at home more often and meal prep on weekends',
+  entertainment: 'switch to free streaming tiers or OTT family plans',
+  shopping:      'apply the 24-hour rule before any non-essential purchase',
+  subscriptions: 'audit and cancel subscriptions unused in the last 30 days',
+  transport:     'try carpooling, public transport, or combining errands',
+  health:        'switch to generic medicines where possible',
+  utilities:     'set AC to 24°C and unplug idle devices',
+  other:         'review this category for reducible expenses',
+};
+
+// Only these categories can realistically be reduced month-to-month.
+// Rent, EMI, insurance, education fees are fixed commitments — never suggest cutting them.
+const REDUCIBLE_CATS = new Set([
+  'food', 'entertainment', 'shopping', 'subscriptions',
+  'transport', 'health', 'utilities', 'other', 'personal',
+]);
+
+let activeFilter = 'all';
+
+/* ---- FILTER & RENDER TIPS ---- */
+function filterTips(el, cat) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = cat;
+  renderTips();
+}
+
+function renderTips() {
+  const grid     = document.getElementById('tipsGrid');
+  const filtered = activeFilter === 'all' ? ALL_TIPS : ALL_TIPS.filter(t => t.cat === activeFilter);
+
+  const tagStyle = {
+    'High Impact':   { bg:'rgba(252,241,208,0.18)', color:'var(--cream)' },
+    'Easy Win':      { bg:'rgba(168,230,191,0.18)', color:'#A8E6BF' },
+    'Quick Win':     { bg:'rgba(168,230,191,0.18)', color:'#A8E6BF' },
+    'Wealth Builder':{ bg:'rgba(240,188,120,0.18)', color:'#F0BC78' },
+    'Growth Hack':   { bg:'rgba(240,188,120,0.18)', color:'#F0BC78' },
+    'Foundation':    { bg:'rgba(240,188,120,0.18)', color:'#F0BC78' },
+    'Debt-Free':     { bg:'rgba(240,160,160,0.18)', color:'#F0A0A0' },
+    'Save Interest': { bg:'rgba(240,160,160,0.18)', color:'#F0A0A0' },
+    'Beginner':      { bg:'rgba(160,204,232,0.18)', color:'#A0CCE8' },
+    'India':         { bg:'rgba(252,241,208,0.18)', color:'var(--cream)' },
+    'Mindset':       { bg:'rgba(212,168,211,0.18)', color:'#D4A8E8' },
+    'Habit':         { bg:'rgba(160,204,232,0.18)', color:'#A0CCE8' },
+    'Advanced':      { bg:'rgba(240,188,120,0.18)', color:'#F0BC78' },
+  };
+
+  grid.innerHTML = filtered.map(t => {
+    const ts = tagStyle[t.tag] || { bg:'rgba(252,241,208,0.12)', color:'var(--text-muted)' };
+    return `
+      <div class="card" style="transition:var(--transition);cursor:default"
+        onmouseover="this.style.transform='translateY(-3px)'"
+        onmouseout="this.style.transform='translateY(0)'">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:1.9rem;flex-shrink:0;line-height:1">${t.icon}</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:7px;flex-wrap:wrap">
+              <h3 style="font-size:0.93rem;font-weight:700;color:var(--cream);flex:1">${t.title}</h3>
+              ${t.tag ? `<span style="font-size:0.65rem;font-weight:700;color:${ts.color};background:${ts.bg};padding:2px 9px;border-radius:50px;white-space:nowrap;flex-shrink:0">${t.tag}</span>` : ''}
+            </div>
+            <p style="font-size:0.81rem;color:var(--text-muted);line-height:1.68">${t.text}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---- SPENDING ANALYSIS ---- */
+function renderSpendingAnalysis(selectedMonth, selectedYear) {
+  const section  = document.getElementById('spendingAnalysis');
+  if (!section) return;
+
+  const expenses = loadUserData('expenses', []);
+  const budgets  = loadUserData('budgets', []);
+  const salary   = loadUserData('salary', 0);
+  const now      = new Date();
+
+  // Default to current month/year
+  if (selectedMonth === undefined) selectedMonth = now.getMonth() + 1;
+  if (selectedYear  === undefined) selectedYear  = now.getFullYear();
+
+  // Build dropdown options — last 12 months
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let dropdownOptions = '';
+  for (let i = 0; i < 12; i++) {
+    const d    = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m    = d.getMonth() + 1;
+    const y    = d.getFullYear();
+    const sel  = (m === selectedMonth && y === selectedYear) ? 'selected' : '';
+    dropdownOptions += `<option value="${m}|${y}" ${sel}>${monthNames[d.getMonth()]} ${y}</option>`;
+  }
+
+  // Filter expenses for selected month
+  const monthExpenses = expenses.filter(e => {
+    const d = new Date(e.date);
+    return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+  });
+
+  // Total per category
+  const catTotals = {};
+  monthExpenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.amount; });
+  const totalSpent = Object.values(catTotals).reduce((s, v) => s + v, 0);
+
+  const topCats = Object.entries(catTotals)
+    .map(([cat, total]) => ({ cat, total }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 6);
+
+  // Over-budget categories this month
+  const overBudget = [];
+  budgets.forEach(b => {
+    const spent = catTotals[b.category] || 0;
+    if (spent > b.limit) {
+      const catName = CAT_DISPLAY[b.category] || b.customLabel || b.category;
+      overBudget.push({ catName, spent, limit: b.limit, over: spent - b.limit });
+    }
+  });
+
+  const monthLabel = `${monthNames[selectedMonth - 1]} ${selectedYear}`;
+  const isEmpty    = topCats.length === 0;
+
+  section.innerHTML = `
+    <div class="section-header" style="margin-bottom:16px">
+      <div class="section-title">📊 Spending Analysis</div>
+      <select class="form-control" style="width:auto;padding:7px 12px;font-size:0.82rem"
+        onchange="(function(v){ const p=v.split('|'); renderSpendingAnalysis(parseInt(p[0]),parseInt(p[1])); })(this.value)">
+        ${dropdownOptions}
+      </select>
+    </div>
+
+    ${isEmpty
+      ? `<div class="card" style="text-align:center;padding:32px;color:var(--text-muted)">
+           <div style="font-size:2rem;margin-bottom:8px">📭</div>
+           <p style="font-size:0.85rem">No expenses recorded for ${monthLabel}.</p>
+           <a href="expenses.html" class="btn btn-secondary btn-sm" style="margin-top:12px">Add Expenses</a>
+         </div>`
+      : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+
+          <!-- Category breakdown -->
+          <div class="card">
+            <div style="font-size:0.78rem;font-weight:700;color:var(--cream);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px">
+              💸 Where Money Went — ${monthLabel}
+            </div>
+            ${topCats.map(c => {
+              const pct    = totalSpent > 0 ? Math.round((c.total / totalSpent) * 100) : 0;
+              const catObj = getCategoryInfo(c.cat);
+              const overB  = budgets.find(b => b.category === c.cat);
+              const isOver = overB && c.total > overB.limit;
+              return `
+                <div style="margin-bottom:12px">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.81rem">
+                    <span>${catObj.icon} ${catObj.label}</span>
+                    <span>
+                      <strong style="color:${isOver ? '#F0A0A0' : 'var(--cream)'}">${formatCurrency(c.total)}</strong>
+                      <span style="color:var(--text-muted);font-size:0.74rem"> (${pct}%)</span>
+                      ${isOver ? '<span style="font-size:0.68rem;color:#F0A0A0;margin-left:4px">⚠️ over</span>' : ''}
+                    </span>
+                  </div>
+                  <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" style="width:${pct}%;background:${isOver ? 'linear-gradient(90deg,#F0A0A0,#E07070)' : 'var(--gradient-3)'}"></div>
+                  </div>
+                </div>`;
+            }).join('')}
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:0.82rem">
+              <span style="color:var(--text-muted)">Total spent</span>
+              <strong style="color:var(--cream)">${formatCurrency(totalSpent)}</strong>
+            </div>
+          </div>
+
+          <!-- Budget compliance + savings -->
+          <div class="card">
+            <div style="font-size:0.78rem;font-weight:700;color:var(--cream);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px">
+              📋 Budget Check — ${monthLabel}
+            </div>
+            ${overBudget.length > 0
+              ? overBudget.map(o => `
+                  <div style="padding:10px 12px;background:rgba(240,160,160,0.12);border:1px solid rgba(240,160,160,0.25);border-radius:var(--radius-sm);margin-bottom:10px">
+                    <div style="font-size:0.85rem;font-weight:600;color:#F0A0A0;margin-bottom:3px">${o.catName}</div>
+                    <div style="font-size:0.78rem;color:var(--text-muted)">
+                      Spent <strong style="color:#F0A0A0">${formatCurrency(o.spent)}</strong>
+                      vs budget <strong style="color:var(--cream)">${formatCurrency(o.limit)}</strong>
+                      · <strong style="color:#F0A0A0">${formatCurrency(o.over)} over</strong>
+                    </div>
+                  </div>`).join('')
+              : budgets.length > 0
+                ? `<div style="padding:16px;text-align:center">
+                     <div style="font-size:1.8rem;margin-bottom:8px">✅</div>
+                     <div style="font-size:0.85rem;color:#A8E6BF;font-weight:600">All within budget!</div>
+                     <div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px">Great spending discipline in ${monthLabel}.</div>
+                   </div>`
+                : `<div style="font-size:0.82rem;color:var(--text-muted);text-align:center;padding:16px">
+                     No budgets set. <a href="budget.html" style="color:var(--cream);font-weight:600">Set budgets →</a>
+                   </div>`
+            }
+            ${salary > 0 ? `
+              <div style="margin-top:12px;padding:10px 12px;background:rgba(252,241,208,0.07);border-radius:var(--radius-sm);font-size:0.79rem">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                  <span style="color:var(--text-muted)">Salary</span>
+                  <span style="color:var(--cream);font-weight:600">${formatCurrency(salary)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                  <span style="color:var(--text-muted)">Spent</span>
+                  <span style="color:#F0BC78;font-weight:600">${formatCurrency(totalSpent)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between">
+                  <span style="color:var(--text-muted)">Saved</span>
+                  <span style="color:${salary - totalSpent >= 0 ? '#A8E6BF' : '#F0A0A0'};font-weight:600">
+                    ${formatCurrency(Math.abs(salary - totalSpent))}
+                    ${salary - totalSpent >= 0
+                      ? `<span style="font-weight:400;font-size:0.74rem">(${Math.round(((salary-totalSpent)/salary)*100)}%)</span>`
+                      : '<span style="font-weight:400;font-size:0.74rem">(over income)</span>'}
+                  </span>
+                </div>
+              </div>` : ''}
+          </div>
+
+        </div>`
+    }
+  `;
+}
+
+/* ---- GOAL-LINKED SUGGESTIONS ---- */
+function renderGoalLinkedSuggestions() {
+  const section  = document.getElementById('goalSuggestionsSection');
+  if (!section) return;
+
+  const goals    = loadUserData('goals', []);
+  const expenses = loadUserData('expenses', []);
+  const budgets  = loadUserData('budgets', []);
+  const salary   = loadUserData('salary', 0);
+  const now      = new Date();
+
+  const activeGoals = goals.filter(g => (g.saved || 0) < g.target);
+  if (activeGoals.length === 0) { section.innerHTML = ''; return; }
+
+  const monthlySpent = {};
+  expenses.forEach(e => {
+    const d = new Date(e.date);
+    if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear())
+      monthlySpent[e.category] = (monthlySpent[e.category] || 0) + e.amount;
+  });
+
+  const suggestions = [];
+  const goalIconMap = { emergency:'🛡️', travel:'✈️', gadget:'📱', education:'📚', vehicle:'🚗', home:'🏠', investment:'📈', wedding:'💍', health:'🏥', other:'🎯' };
+
+  activeGoals.forEach(goal => {
+    const remaining      = goal.target - (goal.saved || 0);
+    const targetDate     = goal.targetDate ? new Date(goal.targetDate) : null;
+    const monthsLeft     = targetDate ? Math.max(1, Math.ceil((targetDate - now) / (1000*60*60*24*30))) : null;
+    const neededPerMonth = monthsLeft ? Math.ceil(remaining / monthsLeft) : null;
+    const goalIcon       = goalIconMap[goal.category] || '🎯';
+    const priorityOrder  = { high:0, medium:1, low:2 };
+
+    budgets.forEach(b => {
+      const spent   = monthlySpent[b.category] || 0;
+      if (spent < 300) return;
+      // Skip fixed/committed categories — can't realistically reduce these
+      if (!REDUCIBLE_CATS.has(b.category) && !b.category.startsWith('custom_')) return;
+      const catName = CAT_DISPLAY[b.category] || b.customLabel || b.category;
+      const tip     = CAT_REDUCTION_TIPS[b.category] || 'reduce spending in this area';
+      const cut     = Math.max(200, Math.round(spent * 0.15 / 100) * 100);
+
+      let monthsSaved = null;
+      if (targetDate && neededPerMonth) {
+        const newMonths = Math.ceil(remaining / (neededPerMonth + cut));
+        monthsSaved = monthsLeft - newMonths;
+        if (monthsSaved < 1) return;
+      }
+
+      suggestions.push({ goalName:goal.name, goalIcon, catName, cut, monthsSaved, monthsLeft, remaining, tip, priority:goal.priority||'medium' });
+    });
+
+    if (budgets.length === 0 && salary > 0) {
+      suggestions.push({ goalName:goal.name, goalIcon, catName:null, cut:Math.round(salary*0.10), monthsSaved:null, monthsLeft, remaining, tip:'set up budgets to get specific category advice', priority:goal.priority||'medium' });
+    }
+  });
+
+  const seen = new Set();
+  const unique = suggestions.filter(s => {
+    const key = `${s.goalName}|${s.catName}`;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  }).sort((a,b) => ({ high:0,medium:1,low:2 }[a.priority]||1) - ({ high:0,medium:1,low:2 }[b.priority]||1)).slice(0,6);
+
+  if (unique.length === 0) { section.innerHTML = ''; return; }
+
+  const priorityBorder = { high:'#F0A0A0', medium:'#F0BC78', low:'#A8E6BF' };
+
+  section.innerHTML = `
+    <div class="section-header" style="margin-bottom:16px">
+      <div class="section-title">🎯 Goal-Based Saving Suggestions</div>
+      <a href="goals.html" class="btn btn-secondary btn-sm">View Goals</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+      ${unique.map(s => `
+        <div class="card" style="border-left:4px solid ${priorityBorder[s.priority]||'var(--cream)'}">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <span style="font-size:1.5rem">${s.goalIcon}</span>
+            <div>
+              <div style="font-size:0.90rem;font-weight:700;color:var(--cream)">${s.goalName}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted)">
+                ${formatCurrency(s.remaining)} still needed${s.monthsLeft ? ` · ${s.monthsLeft} months left` : ''}
+              </div>
+            </div>
+          </div>
+          <div style="font-size:0.81rem;line-height:1.65;color:var(--text-muted)">
+            ${s.catName
+              ? `💡 Reducing <strong style="color:var(--cream)">${s.catName}</strong> by <strong style="color:#F0BC78">${formatCurrency(s.cut)}/month</strong>
+                 ${s.monthsSaved ? `could get you to your goal <strong style="color:#A8E6BF">${s.monthsSaved} month${s.monthsSaved>1?'s':''} sooner</strong>.` : 'would accelerate your goal.'}
+                 <br/><span style="font-size:0.76rem">Tip: ${s.tip}.</span>`
+              : `💡 Setting aside <strong style="color:#F0BC78">${formatCurrency(s.cut)}/month</strong> (10% of salary) will help you reach this goal.
+                 <br/><span style="font-size:0.76rem">Tip: ${s.tip}.</span>`}
+          </div>
+        </div>`).join('')}
+    </div>
+    <p style="font-size:0.74rem;color:var(--text-muted);margin-top:10px"><i class="fas fa-info-circle"></i> Based on this month's spending and your active goals.</p>
+  `;
+}
+
+/* ---- INSIGHT BANNER ---- */
+function renderInsightBanner() {
+  const salary     = loadUserData('salary', 0);
+  const expenses   = loadUserData('expenses', []);
+  const now        = new Date();
+  const thisMonth  = expenses.filter(e => { const d=new Date(e.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
+  const totalSpent = thisMonth.reduce((s,e) => s+e.amount, 0);
+  const savingRate = salary > 0 ? Math.round(((salary-totalSpent)/salary)*100) : 0;
+
+  const banner = document.getElementById('insightBanner');
+  if (!salary) {
+    banner.innerHTML = `<div style="background:rgba(252,241,208,0.10);border:1px solid rgba(252,241,208,0.22);border-radius:var(--radius-sm);padding:14px 20px;font-size:0.85rem;color:rgba(252,241,208,0.75)"><i class="fas fa-info-circle" style="margin-right:8px"></i>Set your salary in <a href="budget.html" style="color:var(--cream);font-weight:700;text-decoration:underline">Budget</a> to unlock personalized insights.</div>`;
+    return;
+  }
+
+  const configs = {
+    success: { bg:'rgba(107,191,138,0.16)', border:'rgba(107,191,138,0.40)', color:'#A8E6BF' },
+    info:    { bg:'rgba(252,241,208,0.10)', border:'rgba(252,241,208,0.28)', color:'var(--cream)' },
+    warning: { bg:'rgba(232,160,85,0.16)',  border:'rgba(232,160,85,0.40)',  color:'#F0BC78' },
+    danger:  { bg:'rgba(224,112,112,0.16)', border:'rgba(224,112,112,0.40)', color:'#F0A0A0' },
+  };
+
+  let msg, type;
+  if (savingRate >= 30)      { msg=`🌟 Excellent! You're saving <strong>${savingRate}%</strong> of your income this month — well above the 20% target.`; type='success'; }
+  else if (savingRate >= 20) { msg=`👍 On track! You're saving <strong>${savingRate}%</strong> this month. Target is 20% — you're hitting it.`; type='info'; }
+  else if (savingRate >= 10) { msg=`⚠️ Saving only <strong>${savingRate}%</strong> this month. The target is 20%. Check the suggestions below for where to cut.`; type='warning'; }
+  else if (salary > 0)       { msg=`🚨 Savings rate is <strong>${savingRate}%</strong> — very low this month. Review your budget and reduce non-essential spending.`; type='danger'; }
+  else return;
+
+  const c = configs[type];
+  banner.innerHTML = `<div style="background:${c.bg};border:1px solid ${c.border};border-radius:var(--radius-sm);padding:14px 20px;font-size:0.85rem;color:${c.color};display:flex;align-items:center;gap:12px">
+    <div style="flex:1">${msg}</div>
+    <div style="text-align:right;font-size:0.78rem;color:var(--text-muted);white-space:nowrap">
+      Spent: <strong style="color:var(--cream)">${formatCurrency(totalSpent)}</strong> of <strong style="color:var(--cream)">${formatCurrency(salary)}</strong>
+    </div>
+  </div>`;
+
+  // Populate golden rule cards
+  const needs=Math.round(salary*0.5), wants=Math.round(salary*0.3), save=Math.round(salary*0.2);
+  const r = document.getElementById('rule5030');
+  if (r) r.innerHTML = `<div style="font-size:0.75rem;display:flex;flex-direction:column;gap:4px;color:var(--text-muted)">
+    <div>Needs: <strong style="color:#A8E6BF">${formatCurrency(needs)}</strong></div>
+    <div>Wants: <strong style="color:#F0BC78">${formatCurrency(wants)}</strong></div>
+    <div>Save:  <strong style="color:#A8E6BF">${formatCurrency(save)}</strong></div>
+  </div>`;
+
+  const ef = document.getElementById('emergencyTarget');
+  if (ef) ef.innerHTML = `<div style="font-size:0.75rem;color:var(--text-muted)">Your target: <strong style="color:#A8E6BF">${formatCurrency((totalSpent||salary*0.7)*6)}</strong></div>`;
+
+  const pf = document.getElementById('payFirst');
+  if (pf) pf.innerHTML = `<div style="font-size:0.75rem;color:var(--text-muted)">Transfer <strong style="color:#F0BC78">${formatCurrency(Math.round(salary*0.1))}</strong> to savings on payday</div>`;
+}
+
+/* ---- INIT ---- */
+document.addEventListener('DOMContentLoaded', () => {
+  const session = requireAuth();
+  if (!session) return;
+  applyUserGreeting();
+  renderInsightBanner();
+  renderGoalLinkedSuggestions();
+  renderSpendingAnalysis();
+  renderTips();
+});
+</script>
+</body>
+</html>

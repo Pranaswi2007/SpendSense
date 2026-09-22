@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Expenses</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">💸 SpendSense</div>
+      <div class="logo-sub">Smart Finance</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="dashboard.html"><span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard</a>
+      <a href="expenses.html" class="active"><span class="nav-icon"><i class="fas fa-receipt"></i></span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon"><i class="fas fa-wallet"></i></span> Budget</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="goals.html"><span class="nav-icon"><i class="fas fa-bullseye"></i></span> Goals</a>
+      <a href="tips.html"><span class="nav-icon"><i class="fas fa-lightbulb"></i></span> Tips</a>
+      <div class="nav-section-title">Account</div>
+      <a href="settings.html"><span class="nav-icon"><i class="fas fa-cog"></i></span> Settings</a>
+      <a href="#" onclick="logout()"><span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar user-avatar-init">U</div>
+      <div class="user-info">
+        <div class="name" id="sidebarUserName">Loading…</div>
+        <div class="role" id="sidebarUserRole">Premium Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <div class="topbar-title">Expenses</div>
+          <div class="topbar-subtitle">Track and manage all your spending</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="openModal('addExpenseModal')">
+          <i class="fas fa-plus"></i> Add Expense
+        </button>
+        <a href="dashboard.html" class="notification-btn" title="Dashboard">
+          <i class="fas fa-home"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- SUMMARY STATS -->
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+        <div class="stat-card purple">
+          <div class="stat-icon purple"><i class="fas fa-calendar-alt"></i></div>
+          <div class="stat-value" id="totalThisMonth">₹0</div>
+          <div class="stat-label">This Month</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon orange"><i class="fas fa-utensils"></i></div>
+          <div class="stat-value" id="topCategoryAmount">₹0</div>
+          <div class="stat-label">Top Category</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green"><i class="fas fa-receipt"></i></div>
+          <div class="stat-value" id="totalTxCount">0</div>
+          <div class="stat-label">Transactions</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue"><i class="fas fa-arrow-down"></i></div>
+          <div class="stat-value" id="avgDaily">₹0</div>
+          <div class="stat-label">Daily Average</div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="grid-2" style="margin-bottom:28px">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">Monthly Trend</div>
+          </div>
+          <div class="chart-container" style="height:200px">
+            <canvas id="expTrendChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">By Category</div>
+          </div>
+          <div class="chart-container" style="height:200px">
+            <canvas id="catBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTERS & TABLE -->
+      <div class="card">
+        <div class="section-header" style="flex-wrap:wrap;gap:12px">
+          <div class="section-title">All Transactions</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <div class="search-wrap" style="max-width:220px">
+              <span class="search-icon"><i class="fas fa-search"></i></span>
+              <input type="text" class="search-input" placeholder="Search..." id="txSearch" oninput="filterExpenses()"/>
+            </div>
+            <select class="form-control" style="width:auto;padding:8px 12px;font-size:0.82rem" id="catFilter" onchange="filterExpenses()">
+              <option value="">All Categories</option>
+              <option value="food">Food & Dining</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="shopping">Shopping</option>
+              <option value="subscriptions">Subscriptions</option>
+              <option value="transport">Transport</option>
+              <option value="health">Healthcare</option>
+              <option value="utilities">Utilities</option>
+              <option value="rent">Rent</option>
+              <option value="emi">EMI / Loan</option>
+              <option value="insurance">Insurance</option>
+              <option value="other">Other</option>
+            </select>
+            <select class="form-control" style="width:auto;padding:8px 12px;font-size:0.82rem" id="monthFilter" onchange="filterExpenses()">
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
+              <i class="fas fa-download"></i> Export
+            </button>
+          </div>
+        </div>
+
+        <!-- CATEGORY CHIPS -->
+        <div class="chip-group" id="catChips">
+          <div class="chip active" onclick="setChip(this,'')">All</div>
+          <div class="chip" onclick="setChip(this,'food')">🍔 Food</div>
+          <div class="chip" onclick="setChip(this,'entertainment')">🎬 Entertainment</div>
+          <div class="chip" onclick="setChip(this,'shopping')">🛒 Shopping</div>
+          <div class="chip" onclick="setChip(this,'subscriptions')">📺 Subscriptions</div>
+          <div class="chip" onclick="setChip(this,'transport')">🚗 Transport</div>
+          <div class="chip" onclick="setChip(this,'health')">🏥 Health</div>
+          <div class="chip" onclick="setChip(this,'utilities')">💡 Utilities</div>
+        </div>
+
+        <div id="expenseTableWrap">
+          <table class="data-table" id="expenseTable">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Payment</th>
+                <th>Amount</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expenseTableBody">
+              <!-- populated by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div id="emptyExpenses" class="empty-state" style="display:none">
+          <div class="empty-icon">🔍</div>
+          <h3>No transactions found</h3>
+          <p>Try adjusting your filters or add a new expense.</p>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="openModal('addExpenseModal')">
+            <i class="fas fa-plus"></i> Add Expense
+          </button>
+        </div>
+
+        <!-- PAGINATION -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px">
+          <span style="font-size:0.8rem;color:var(--text-muted)" id="paginationInfo"></span>
+          <div style="display:flex;gap:8px" id="paginationBtns"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ADD EXPENSE MODAL -->
+<div class="modal-overlay" id="addExpenseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">➕ Add Expense</h2>
+      <button class="modal-close" onclick="closeModal('addExpenseModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form onsubmit="addExpense(event)">
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" class="form-control" id="expName" placeholder="e.g. Lunch at Café" required/>
+      </div>
+      <div class="grid-2" style="gap:16px">
+        <div class="form-group">
+          <label class="form-label">Amount (₹)</label>
+          <input type="number" class="form-control" id="expAmount" placeholder="0.00" min="1" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-control" id="expDate" required/>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:16px">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-control" id="expCategory" required>
+            <option value="">Select category</option>
+            <option value="food">🍔 Food & Dining</option>
+            <option value="entertainment">🎬 Entertainment</option>
+            <option value="shopping">🛒 Shopping</option>
+            <option value="subscriptions">📺 Subscriptions</option>
+            <option value="transport">🚗 Transport</option>
+            <option value="health">🏥 Healthcare</option>
+            <option value="utilities">💡 Utilities</option>
+            <option value="rent">🏠 Rent</option>
+            <option value="emi">🏦 EMI / Loan</option>
+            <option value="insurance">🛡️ Insurance</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-control" id="expPayment">
+            <option value="UPI">UPI</option>
+            <option value="Card">Debit/Credit Card</option>
+            <option value="Cash">Cash</option>
+            <option value="NetBanking">Net Banking</option>
+            <option value="Wallet">Wallet</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input type="text" class="form-control" id="expNotes" placeholder="Any additional details..."/>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1">
+          <i class="fas fa-save"></i> Save Expense
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('addExpenseModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT EXPENSE MODAL -->
+<div class="modal-overlay" id="editExpenseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">✏️ Edit Expense</h2>
+      <button class="modal-close" onclick="closeModal('editExpenseModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form onsubmit="saveEditExpense(event)">
+      <input type="hidden" id="editExpId"/>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" class="form-control" id="editExpName" required/>
+      </div>
+      <div class="grid-2" style="gap:16px">
+        <div class="form-group">
+          <label class="form-label">Amount (₹)</label>
+          <input type="number" class="form-control" id="editExpAmount" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-control" id="editExpDate" required/>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:16px">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-control" id="editExpCategory">
+            <option value="food">🍔 Food & Dining</option>
+            <option value="entertainment">🎬 Entertainment</option>
+            <option value="shopping">🛒 Shopping</option>
+            <option value="subscriptions">📺 Subscriptions</option>
+            <option value="transport">🚗 Transport</option>
+            <option value="health">🏥 Healthcare</option>
+            <option value="utilities">💡 Utilities</option>
+            <option value="rent">🏠 Rent</option>
+            <option value="emi">🏦 EMI / Loan</option>
+            <option value="insurance">🛡️ Insurance</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-control" id="editExpPayment">
+            <option value="UPI">UPI</option>
+            <option value="Card">Debit/Credit Card</option>
+            <option value="Cash">Cash</option>
+            <option value="NetBanking">Net Banking</option>
+            <option value="Wallet">Wallet</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1">
+          <i class="fas fa-save"></i> Update Expense
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('editExpenseModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="auth.js"></script>
+<script src="utils.js"></script>
+<script src="expenses.js"></script>
+</body>
+</html>

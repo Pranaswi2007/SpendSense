@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Settings</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .settings-section { margin-bottom: 32px; }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0; border-bottom: 1px solid var(--border);
+      gap: 16px; flex-wrap: wrap;
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row-info .label { font-size: 0.9rem; font-weight: 600; margin-bottom: 3px; }
+    .settings-row-info .desc  { font-size: 0.78rem; color: var(--text-muted); }
+    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: rgba(255,255,255,0.1); border-radius: 24px; transition: 0.3s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; border-radius: 50%;
+      left: 3px; bottom: 3px; background: white; transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+    .avatar-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .av-opt {
+      width: 48px; height: 48px; border-radius: 50%; font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: 2px solid transparent;
+      background: var(--card-light); transition: var(--transition);
+    }
+    .av-opt:hover, .av-opt.sel { border-color: var(--primary); transform: scale(1.1); }
+    .danger-zone { border-color: rgba(255,71,87,0.3) !important; }
+    .danger-zone .section-title { color: var(--danger); }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">💸 SpendSense</div>
+      <div class="logo-sub">Smart Finance</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="dashboard.html"><span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon"><i class="fas fa-receipt"></i></span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon"><i class="fas fa-wallet"></i></span> Budget</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="goals.html"><span class="nav-icon"><i class="fas fa-bullseye"></i></span> Goals</a>
+      <a href="tips.html"><span class="nav-icon"><i class="fas fa-lightbulb"></i></span> Tips</a>
+      <div class="nav-section-title">Account</div>
+      <a href="settings.html" class="active"><span class="nav-icon"><i class="fas fa-cog"></i></span> Settings</a>
+      <a href="#" onclick="logout()"><span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar user-avatar-init">U</div>
+      <div class="user-info">
+        <div class="name" id="sidebarUserName">User</div>
+        <div class="role" id="sidebarUserRole">Premium Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <div class="topbar-title">Settings</div>
+          <div class="topbar-subtitle">Manage your account and preferences</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a href="dashboard.html" class="notification-btn" title="Dashboard"><i class="fas fa-home"></i></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+
+        <!-- PROFILE -->
+        <div style="grid-column:1/-1">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:20px">👤 Profile Information</div>
+            <div style="display:flex;align-items:center;gap:24px;margin-bottom:24px;flex-wrap:wrap">
+              <div id="profileAvatarDisplay" style="width:72px;height:72px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0">😊</div>
+              <div>
+                <div id="profileNameDisplay" style="font-size:1.3rem;font-weight:800;margin-bottom:4px">Loading...</div>
+                <div id="profileEmailDisplay" style="font-size:0.85rem;color:var(--text-muted)"></div>
+                <div id="profileMemberDisplay" style="font-size:0.75rem;color:var(--text-dark);margin-top:4px"></div>
+              </div>
+            </div>
+
+            <div style="margin-bottom:20px">
+              <div class="form-label" style="margin-bottom:10px">Choose Avatar</div>
+              <div class="avatar-grid" id="avatarGrid">
+                <div class="av-opt" onclick="selectAvatar(this,'😊')">😊</div>
+                <div class="av-opt" onclick="selectAvatar(this,'🦁')">🦁</div>
+                <div class="av-opt" onclick="selectAvatar(this,'🐯')">🐯</div>
+                <div class="av-opt" onclick="selectAvatar(this,'🦊')">🦊</div>
+                <div class="av-opt" onclick="selectAvatar(this,'🐧')">🐧</div>
+                <div class="av-opt" onclick="selectAvatar(this,'🤖')">🤖</div>
+                <div class="av-opt" onclick="selectAvatar(this,'👾')">👾</div>
+                <div class="av-opt" onclick="selectAvatar(this,'🎭')">🎭</div>
+                <div class="av-opt" onclick="selectAvatar(this,'🚀')">🚀</div>
+                <div class="av-opt" onclick="selectAvatar(this,'💎')">💎</div>
+              </div>
+            </div>
+
+            <form onsubmit="saveProfile(event)">
+              <div class="grid-2" style="gap:16px">
+                <div class="form-group">
+                  <label class="form-label">First Name</label>
+                  <input type="text" class="form-control" id="settingsFname" required/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" class="form-control" id="settingsLname" required/>
+                </div>
+              </div>
+              <div class="grid-2" style="gap:16px">
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" class="form-control" id="settingsEmail" required/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone Number</label>
+                  <input type="tel" class="form-control" id="settingsPhone" maxlength="10"/>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Profile</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- CHANGE PASSWORD -->
+        <div class="card settings-section">
+          <div class="section-title" style="margin-bottom:20px">🔒 Change Password</div>
+          <form onsubmit="changePassword(event)">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input type="password" class="form-control" id="currPass" placeholder="Enter current password"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPass" placeholder="Min. 8 characters"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" id="confPass" placeholder="Repeat new password"/>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-lock"></i> Update Password</button>
+          </form>
+        </div>
+
+        <!-- FINANCIAL PROFILE -->
+        <div class="card settings-section">
+          <div class="section-title" style="margin-bottom:20px">💰 Financial Profile</div>
+          <div class="form-group">
+            <label class="form-label">Monthly Salary (₹)</label>
+            <input type="number" class="form-control" id="settingsSalary" placeholder="e.g. 85000"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Savings Goal (%)</label>
+            <input type="number" class="form-control" id="settingsSavingsGoal" placeholder="e.g. 20" min="1" max="100"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Currency</label>
+            <select class="form-control" id="settingsCurrency">
+              <option value="INR">🇮🇳 INR (₹)</option>
+              <option value="USD">🇺🇸 USD ($)</option>
+              <option value="EUR">🇪🇺 EUR (€)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="saveFinancialProfile()"><i class="fas fa-save"></i> Save</button>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="card settings-section">
+          <div class="section-title" style="margin-bottom:20px">🔔 Notifications</div>
+          <div class="settings-row">
+            <div class="settings-row-info"><div class="label">Budget Alerts</div><div class="desc">Alert when spending exceeds threshold</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="notif_budget" checked/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info"><div class="label">Payment Reminders</div><div class="desc">Remind 3 days before due date</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="notif_reminders" checked/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info"><div class="label">Weekly Summary</div><div class="desc">Weekly spending digest every Sunday</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="notif_weekly"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info"><div class="label">Goal Milestones</div><div class="desc">Celebrate when you hit savings goals</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="notif_goals" checked/><span class="toggle-slider"></span></label>
+          </div>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="saveNotifications()"><i class="fas fa-save"></i> Save Preferences</button>
+        </div>
+
+        <!-- APPEARANCE -->
+        <div class="card settings-section">
+          <div class="section-title" style="margin-bottom:20px">🎨 Appearance</div>
+          <div class="form-group">
+            <label class="form-label">Accent Color</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px" id="accentPicker">
+              <div class="color-swatch sel" style="background:#6C63FF" onclick="selectAccent(this,'#6C63FF')"></div>
+              <div class="color-swatch" style="background:#FF6584" onclick="selectAccent(this,'#FF6584')"></div>
+              <div class="color-swatch" style="background:#43E97B" onclick="selectAccent(this,'#43E97B')"></div>
+              <div class="color-swatch" style="background:#FFB347" onclick="selectAccent(this,'#FFB347')"></div>
+              <div class="color-swatch" style="background:#38F9D7" onclick="selectAccent(this,'#38F9D7')"></div>
+              <div class="color-swatch" style="background:#FF4757" onclick="selectAccent(this,'#FF4757')"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date Format</label>
+            <select class="form-control" id="settingsDateFmt">
+              <option value="DD MMM YYYY">17 Sep 2026</option>
+              <option value="MM/DD/YYYY">09/17/2026</option>
+              <option value="DD/MM/YYYY">17/09/2026</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="saveAppearance()"><i class="fas fa-paint-brush"></i> Apply</button>
+        </div>
+
+        <!-- PRIVACY -->
+        <div class="card settings-section">
+          <div class="section-title" style="margin-bottom:20px">🔐 Privacy & Security</div>
+          <div class="settings-row">
+            <div class="settings-row-info"><div class="label">Two-Factor Authentication</div><div class="desc">Extra layer of security on login</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="twofa"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info"><div class="label">Login Notifications</div><div class="desc">Alert on every new login</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="loginNotif" checked/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info"><div class="label">Data Sharing</div><div class="desc">Share anonymised data to improve the app</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="dataShare"/><span class="toggle-slider"></span></label>
+          </div>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="savePrivacy()"><i class="fas fa-shield-alt"></i> Save</button>
+        </div>
+
+        <!-- DATA MANAGEMENT -->
+        <div class="card settings-section">
+          <div class="section-title" style="margin-bottom:20px">📂 Data Management</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+              <div><div style="font-size:0.88rem;font-weight:600">Export All Data</div><div style="font-size:0.75rem;color:var(--text-muted)">Download your expenses as CSV</div></div>
+              <button class="btn btn-secondary btn-sm" onclick="exportAllData()"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+              <div><div style="font-size:0.88rem;font-weight:600">Import Data</div><div style="font-size:0.75rem;color:var(--text-muted)">Import expenses from CSV file</div></div>
+              <label class="btn btn-secondary btn-sm" style="cursor:pointer"><i class="fas fa-upload"></i> Import <input type="file" accept=".csv" style="display:none" onchange="importData(this)"/></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="card settings-section danger-zone" style="grid-column:1/-1">
+          <div class="section-title" style="margin-bottom:20px;color:var(--danger)">⚠️ Danger Zone</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:16px;background:rgba(255,71,87,0.05);border:1px solid rgba(255,71,87,0.15);border-radius:var(--radius-sm)">
+            <div>
+              <div style="font-size:0.9rem;font-weight:600;margin-bottom:4px">Log Out</div>
+              <div style="font-size:0.78rem;color:var(--text-muted)">Sign out of your account on this device.</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:16px;background:rgba(255,71,87,0.05);border:1px solid rgba(255,71,87,0.15);border-radius:var(--radius-sm);margin-top:12px">
+            <div>
+              <div style="font-size:0.9rem;font-weight:600;margin-bottom:4px">Reset All Data</div>
+              <div style="font-size:0.78rem;color:var(--text-muted)">Delete all your expenses, budgets, goals and bank accounts. This cannot be undone.</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="resetAllData()"><i class="fas fa-trash"></i> Reset My Data</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:16px;background:rgba(255,71,87,0.05);border:1px solid rgba(255,71,87,0.15);border-radius:var(--radius-sm);margin-top:12px">
+            <div>
+              <div style="font-size:0.9rem;font-weight:600;margin-bottom:4px">Delete Account</div>
+              <div style="font-size:0.78rem;color:var(--text-muted)">Permanently delete your SpendSense account and all associated data.</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="deleteAccount()"><i class="fas fa-user-times"></i> Delete Account</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<style>
+  .color-swatch {
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+    transition: var(--transition);
+  }
+  .color-swatch:hover, .color-swatch.sel { border-color: white; transform: scale(1.15); }
+</style>
+
+<script src="auth.js"></script>
+<script src="utils.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Budget</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">💸SpendSense</div>
+      <div class="logo-sub">Smart Finance</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="dashboard.html"><span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon"><i class="fas fa-receipt"></i></span> Expenses</a>
+      <a href="budget.html" class="active"><span class="nav-icon"><i class="fas fa-wallet"></i></span> Budget</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="goals.html"><span class="nav-icon"><i class="fas fa-bullseye"></i></span> Goals</a>
+      <a href="tips.html"><span class="nav-icon"><i class="fas fa-lightbulb"></i></span> Tips</a>
+      <div class="nav-section-title">Account</div>
+      <a href="settings.html"><span class="nav-icon"><i class="fas fa-cog"></i></span> Settings</a>
+      <a href="#" onclick="logout()"><span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar user-avatar-init">U</div>
+      <div class="user-info">
+        <div class="name" id="sidebarUserName">Loading…</div>
+        <div class="role" id="sidebarUserRole">Premium Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <div class="topbar-title">Budget Planner</div>
+          <div class="topbar-subtitle">Set limits and track your spending goals</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-secondary btn-sm" onclick="openSmartPlanner()" style="margin-right:4px">
+          <i class="fas fa-magic"></i> Smart Planner
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('addBudgetModal')">
+          <i class="fas fa-plus"></i> Set Budget
+        </button>
+        <a href="dashboard.html" class="notification-btn" title="Dashboard">
+          <i class="fas fa-home"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- SALARY INPUT BANNER -->
+      <div class="card salary-banner" style="margin-bottom:28px;background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(255,101,132,0.08));border-color:rgba(108,99,255,0.3)">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Monthly Salary</div>
+            <div style="font-size:2rem;font-weight:800;font-family:'Poppins',sans-serif" id="salaryDisplay">₹85,000</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">
+              Allocated: <span id="allocatedDisplay" style="color:var(--warning);font-weight:600">₹56,000</span> &nbsp;|&nbsp;
+              Unallocated: <span id="unallocatedDisplay" style="color:var(--accent);font-weight:600">₹29,000</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div>
+              <div class="form-label" style="margin-bottom:6px">Update Salary</div>
+              <div style="display:flex;gap:8px">
+                <input type="number" class="form-control" id="salaryInput" placeholder="Enter monthly salary" style="width:180px"/>
+                <button class="btn btn-primary btn-sm" onclick="updateSalary()">Update</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="progress-bar-wrap" style="margin-top:16px">
+          <div class="progress-bar-fill" id="salaryProgressBar" style="background:var(--gradient-1)"></div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:6px" id="salaryProgressLabel"></div>
+      </div>
+
+      <!-- OVERVIEW STATS -->
+      <div class="stat-grid" style="margin-bottom:28px">
+        <div class="stat-card green">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-value" id="onTrackCount">0</div>
+          <div class="stat-label">On Track</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-value" id="nearLimitCount">0</div>
+          <div class="stat-label">Near Limit (>75%)</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-icon" style="background:rgba(255,71,87,0.15);color:var(--danger)"><i class="fas fa-fire"></i></div>
+          <div class="stat-value" id="exceededCount">0</div>
+          <div class="stat-label">Exceeded</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue"><i class="fas fa-percentage"></i></div>
+          <div class="stat-value" id="avgUsage">0%</div>
+          <div class="stat-label">Avg Budget Used</div>
+        </div>
+      </div>
+
+      <!-- BUDGET LIST + CHART -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">Category Budgets</div>
+            <div style="display:flex;gap:8px">
+              <span class="badge badge-primary" id="budgetMonthLabel"></span>
+          </div>
+          </div>
+          <div id="budgetList"><!-- filled by JS --></div>
+          <button class="btn btn-secondary btn-full" style="margin-top:16px" onclick="openModal('addBudgetModal')">
+            <i class="fas fa-plus"></i> Add Category Budget
+          </button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <!-- RADAR CHART -->
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Budget vs Spent</div>
+            </div>
+            <div class="chart-container" style="height:240px">
+              <canvas id="budgetRadarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- SMART TIPS -->
+          <div class="card">
+            <div class="section-title" style="margin-bottom:16px">💡 Smart Tips</div>
+            <div id="smartTipsList" style="display:flex;flex-direction:column;gap:12px"><!-- filled by JS --></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ADD BUDGET MODAL -->
+<div class="modal-overlay" id="addBudgetModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">🎯 Set Budget</h2>
+      <button class="modal-close" onclick="closeModal('addBudgetModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form onsubmit="addBudget(event)">
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-control" id="budgetCategory" required onchange="toggleCustomBudgetName(this.value)">
+          <option value="">Select category</option>
+          <option value="food">🍔 Food & Dining</option>
+          <option value="entertainment">🎬 Entertainment</option>
+          <option value="shopping">🛒 Shopping</option>
+          <option value="subscriptions">📺 Subscriptions</option>
+          <option value="transport">🚗 Transport</option>
+          <option value="health">🏥 Healthcare</option>
+          <option value="utilities">💡 Utilities</option>
+          <option value="rent">🏠 Rent</option>
+          <option value="emi">🏦 EMI / Loan</option>
+          <option value="insurance">🛡️ Insurance</option>
+          <option value="other">📦 Other</option>
+        </select>
+      </div>
+      <div class="form-group" id="customBudgetNameGroup" style="display:none">
+        <label class="form-label">Custom Category Name</label>
+        <input type="text" class="form-control" id="customBudgetName" placeholder="e.g. Pet Care, Hobbies…" maxlength="32"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monthly Limit (₹)</label>
+        <input type="number" class="form-control" id="budgetLimit" placeholder="e.g. 10000" min="100" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Alert Threshold</label>
+        <select class="form-control" id="budgetThreshold">
+          <option value="75">Alert at 75%</option>
+          <option value="80" selected>Alert at 80%</option>
+          <option value="90">Alert at 90%</option>
+          <option value="100">Alert only when exceeded</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1">
+          <i class="fas fa-save"></i> Save Budget
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('addBudgetModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT BUDGET MODAL -->
+<div class="modal-overlay" id="editBudgetModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">✏️ Edit Budget</h2>
+      <button class="modal-close" onclick="closeModal('editBudgetModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form onsubmit="saveEditBudget(event)">
+      <input type="hidden" id="editBudgetId"/>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <input type="text" class="form-control" id="editBudgetCatDisplay" readonly style="opacity:0.6"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monthly Limit (₹)</label>
+        <input type="number" class="form-control" id="editBudgetLimit" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Alert Threshold</label>
+        <select class="form-control" id="editBudgetThreshold">
+          <option value="75">Alert at 75%</option>
+          <option value="80">Alert at 80%</option>
+          <option value="90">Alert at 90%</option>
+          <option value="100">Alert only when exceeded</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1">
+          <i class="fas fa-save"></i> Update
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('editBudgetModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== SMART BUDGET PLANNER MODAL ===== -->
+<div class="modal-overlay" id="smartPlannerModal">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <h2 class="modal-title">✨ Smart Budget Planner</h2>
+      <button class="modal-close" onclick="closeModal('smartPlannerModal')"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <div id="plannerStepIndicator" style="display:flex;gap:0;margin-bottom:24px">
+      <div id="stepDot1" style="flex:1;height:4px;background:var(--primary);border-radius:4px 0 0 4px;transition:var(--transition)"></div>
+      <div id="stepDot2" style="flex:1;height:4px;background:var(--border);transition:var(--transition)"></div>
+      <div id="stepDot3" style="flex:1;height:4px;background:var(--border);border-radius:0 4px 4px 0;transition:var(--transition)"></div>
+    </div>
+
+    <!-- STEP 1: Salary + Savings Goal -->
+    <div id="plannerStep1">
+      <div style="margin-bottom:6px;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Step 1 of 3</div>
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px">Your Income & Savings Goal</h3>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:20px;line-height:1.6">
+        We'll build your budget around your actual salary. Tell us how much you want to save each month.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Monthly Take-Home Salary (₹)</label>
+        <input type="number" class="form-control" id="plannerSalary" placeholder="e.g. 50000" min="1000"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Savings Goal</label>
+        <select class="form-control" id="plannerGoalType">
+          <option value="conservative">💰 Save 20% — Comfortable start</option>
+          <option value="moderate">📈 Save 30% — Healthy savings habit</option>
+          <option value="aggressive">🚀 Save 40% — Fast wealth building</option>
+          <option value="custom">✏️ Custom — I'll set my own %</option>
+        </select>
+      </div>
+      <div class="form-group" id="plannerCustomSavingGroup" style="display:none">
+        <label class="form-label">Custom Savings % (5–70%)</label>
+        <input type="number" class="form-control" id="plannerCustomSaving" placeholder="e.g. 25" min="5" max="70"/>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button class="btn btn-primary" style="flex:1" onclick="goToPlannerStep2()">
+          Next — Tell Us Your Spending <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="btn btn-secondary" onclick="closeModal('smartPlannerModal')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Category selection + actual amounts -->
+    <div id="plannerStep2" style="display:none">
+      <div style="margin-bottom:6px;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Step 2 of 3</div>
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Where Do You Spend?</h3>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6">
+        Check every category you spend on. For things you <strong>know the amount</strong> (rent, EMI, fees) — enter it. For others, leave blank and we'll suggest a number.
+      </p>
+      <div id="plannerCatAmounts" style="display:flex;flex-direction:column;gap:10px;max-height:380px;overflow-y:auto;padding-right:4px;margin-bottom:16px">
+        <!-- filled by JS -->
+      </div>
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-secondary" onclick="goToPlannerStep1()"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary" style="flex:1" onclick="goToPlannerStep3()">
+          <i class="fas fa-magic"></i> Build My Budget Plan
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Preview + Apply -->
+    <div id="plannerStep3" style="display:none">
+      <div style="margin-bottom:6px;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Step 3 of 3</div>
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">Your Personalised Budget Plan</h3>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;line-height:1.5">
+        Review your plan. <span style="color:var(--cream);font-weight:600;border-bottom:2px solid var(--cream)">Cream border</span> = you set this. &nbsp;<span style="color:var(--warning);font-weight:600;border-bottom:2px solid var(--warning)">Gold border</span> = we suggested this.
+      </p>
+      <div id="plannerPreviewList" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding-right:4px;margin-bottom:14px">
+        <!-- filled by JS -->
+      </div>
+      <div id="plannerSavingsSummary" style="margin-bottom:14px"></div>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:14px">
+        <i class="fas fa-info-circle"></i> Applying this plan will replace your existing budgets. You can edit any category afterwards.
+      </p>
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-secondary" onclick="goToPlannerStep2()"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary" style="flex:1" onclick="applyPlannerBudget()">
+          <i class="fas fa-check"></i> Apply This Plan
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="utils.js"></script>
+<script src="budget.js"></script>
+</body>
+</html>

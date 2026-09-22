@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Goals</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">💸 SpendSense</div>
+      <div class="logo-sub">Smart Finance</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="dashboard.html"><span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon"><i class="fas fa-receipt"></i></span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon"><i class="fas fa-wallet"></i></span> Budget</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="goals.html" class="active"><span class="nav-icon"><i class="fas fa-bullseye"></i></span> Goals</a>
+      <a href="tips.html"><span class="nav-icon"><i class="fas fa-lightbulb"></i></span> Tips</a>
+      <div class="nav-section-title">Account</div>
+      <a href="settings.html"><span class="nav-icon"><i class="fas fa-cog"></i></span> Settings</a>
+      <a href="#" onclick="logout()"><span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar user-avatar-init">U</div>
+      <div class="user-info">
+        <div class="name" id="sidebarUserName">User</div>
+        <div class="role" id="sidebarUserRole">Premium Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <div class="topbar-title">Financial Goals</div>
+          <div class="topbar-subtitle">Set targets and watch your progress grow</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="openModal('addGoalModal')">
+          <i class="fas fa-plus"></i> New Goal
+        </button>
+        <a href="dashboard.html" class="notification-btn" title="Dashboard"><i class="fas fa-home"></i></a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- OVERVIEW STATS -->
+      <div class="stat-grid" style="margin-bottom:28px" id="goalStats">
+        <div class="stat-card purple">
+          <div class="stat-icon purple"><i class="fas fa-bullseye"></i></div>
+          <div class="stat-value" id="totalGoals">0</div>
+          <div class="stat-label">Total Goals</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-value" id="completedGoals">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon orange"><i class="fas fa-hourglass-half"></i></div>
+          <div class="stat-value" id="activeGoals">0</div>
+          <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue"><i class="fas fa-piggy-bank"></i></div>
+          <div class="stat-value" id="totalSavedGoals">₹0</div>
+          <div class="stat-label">Total Saved</div>
+        </div>
+      </div>
+
+      <!-- GOALS GRID -->
+      <div id="goalsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin-bottom:28px">
+        <!-- filled by JS -->
+      </div>
+
+      <!-- CHART ROW -->
+      <div class="grid-2" id="goalChartRow" style="display:none">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Goal Progress Overview</div>
+          <div class="chart-container" style="height:240px"><canvas id="goalProgressChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px">Savings by Category</div>
+          <div class="chart-container" style="height:240px"><canvas id="goalCatChart"></canvas></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ADD GOAL MODAL -->
+<div class="modal-overlay" id="addGoalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">🎯 New Financial Goal</h2>
+      <button class="modal-close" onclick="closeModal('addGoalModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form onsubmit="addGoal(event)">
+      <div class="form-group">
+        <label class="form-label">Goal Name</label>
+        <input type="text" class="form-control" id="goalName" placeholder="e.g. Emergency Fund, New Laptop, Trip to Goa" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-control" id="goalCategory" required>
+          <option value="">Select category</option>
+          <option value="emergency">🛡️ Emergency Fund</option>
+          <option value="travel">✈️ Travel</option>
+          <option value="gadget">📱 Gadget / Electronics</option>
+          <option value="education">📚 Education</option>
+          <option value="vehicle">🚗 Vehicle</option>
+          <option value="home">🏠 Home / Property</option>
+          <option value="investment">📈 Investment</option>
+          <option value="wedding">💍 Wedding</option>
+          <option value="health">🏥 Medical / Health</option>
+          <option value="other">🎯 Other</option>
+        </select>
+      </div>
+      <div class="grid-2" style="gap:14px">
+        <div class="form-group">
+          <label class="form-label">Target Amount (₹)</label>
+          <input type="number" class="form-control" id="goalTarget" placeholder="50000" min="100" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Already Saved (₹)</label>
+          <input type="number" class="form-control" id="goalSaved" placeholder="0" min="0" value="0"/>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:14px">
+        <div class="form-group">
+          <label class="form-label">Target Date</label>
+          <input type="date" class="form-control" id="goalDate" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-control" id="goalPriority">
+            <option value="high">🔴 High</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input type="text" class="form-control" id="goalNotes" placeholder="Why is this goal important to you?"/>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1"><i class="fas fa-save"></i> Save Goal</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('addGoalModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD FUNDS MODAL -->
+<div class="modal-overlay" id="addFundsModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h2 class="modal-title">💰 Add Funds</h2>
+      <button class="modal-close" onclick="closeModal('addFundsModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <input type="hidden" id="addFundsGoalId"/>
+    <div id="addFundsGoalInfo" style="background:rgba(108,99,255,0.1);border-radius:var(--radius-sm);padding:12px;margin-bottom:20px;font-size:0.85rem"></div>
+    <div class="form-group">
+      <label class="form-label">Amount to Add (₹)</label>
+      <input type="number" class="form-control" id="addFundsAmount" placeholder="Enter amount" min="1" required/>
+    </div>
+    <button class="btn btn-success btn-full" onclick="addFundsToGoal()">
+      <i class="fas fa-plus-circle"></i> Add to Goal
+    </button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="auth.js"></script>
+<script src="utils.js"></script>
+<script src="goals.js"></script>
+</body>
+</html>

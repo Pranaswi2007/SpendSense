@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpendSense — Dashboard</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">💸SpendSense</div>
+      <div class="logo-sub">Smart Finance</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="dashboard.html" class="active"><span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard</a>
+      <a href="expenses.html"><span class="nav-icon"><i class="fas fa-receipt"></i></span> Expenses</a>
+      <a href="budget.html"><span class="nav-icon"><i class="fas fa-wallet"></i></span> Budget</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="goals.html"><span class="nav-icon"><i class="fas fa-bullseye"></i></span> Goals</a>
+      <a href="tips.html"><span class="nav-icon"><i class="fas fa-lightbulb"></i></span> Tips</a>
+      <div class="nav-section-title">Account</div>
+      <a href="settings.html"><span class="nav-icon"><i class="fas fa-cog"></i></span> Settings</a>
+      <a href="#" onclick="logout()"><span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar user-avatar-init">U</div>
+      <div class="user-info">
+        <div class="name" id="sidebarUserName">Loading…</div>
+        <div class="role" id="sidebarUserRole">Premium Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <div class="topbar-title" id="userGreeting">Loading…</div>
+          <div class="topbar-subtitle" id="topbarDate"></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap">
+          <span class="search-icon"><i class="fas fa-search"></i></span>
+          <input type="text" class="search-input" placeholder="Search transactions…" id="dashSearch" oninput="dashboardSearch(this.value)"/>
+        </div>
+        <div class="notification-btn" onclick="showNotifications()" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notifBadge" style="display:none">!</span>
+        </div>
+        <a href="settings.html">
+          <div class="avatar user-avatar-init" style="cursor:pointer;width:38px;height:38px">U</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="page-content" id="dashboardContent">
+      <!-- Filled by JS — either onboarding or normal dashboard -->
+    </div>
+  </main>
+</div>
+
+<!-- NOTIFICATIONS PANEL -->
+<div class="modal-overlay" id="notifModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h2 class="modal-title">🔔 Notifications</h2>
+      <button class="modal-close" onclick="closeModal('notifModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="notifList" style="display:flex;flex-direction:column;gap:12px">
+      <p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:20px">No notifications yet.</p>
+    </div>
+    <button class="btn btn-secondary btn-full" style="margin-top:16px" onclick="dismissAllNotifs()">Dismiss All</button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<style>
+  .alert-banner {
+    display:flex; align-items:center; gap:12px;
+    padding:14px 20px;
+    background:rgba(255,179,71,0.1); border:1px solid rgba(255,179,71,0.35); border-radius:var(--radius-sm);
+    margin-bottom:24px; font-size:0.85rem; color:var(--warning);
+    animation:fadeIn 0.4s ease;
+  }
+  .quick-actions-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .quick-action-btn {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:16px 10px;
+    background:var(--card-light); border:1px solid var(--border); border-radius:var(--radius-sm);
+    cursor:pointer; transition:var(--transition); color:var(--text);
+    font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:500;
+  }
+  .quick-action-btn:hover { border-color:rgba(108,99,255,0.5); background:var(--card-hover); transform:translateY(-2px); }
+  .qa-icon { width:42px; height:42px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+
+  /* onboarding */
+  .onboarding-card {
+    background:linear-gradient(135deg,rgba(108,99,255,0.1),rgba(255,101,132,0.06));
+    border:1px solid rgba(108,99,255,0.3); border-radius:var(--radius-lg);
+    padding:40px; text-align:center; margin-bottom:24px;
+  }
+  .onboarding-steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-top:28px; }
+  .ob-step {
+    background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:24px 16px; cursor:pointer; transition:var(--transition);
+  }
+  .ob-step:hover { border-color:rgba(108,99,255,0.5); transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .ob-step-num { font-size:2rem; font-weight:800; background:var(--gradient-1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:12px; line-height:1; }
+  .ob-step h3 { font-size:0.95rem; margin-bottom:6px; }
+  .ob-step p  { font-size:0.78rem; color:var(--text-muted); line-height:1.5; }
+
+  /* notif items */
+  .notif-item { display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--radius-sm); font-size:0.82rem; }
+  .notif-item p { color:var(--text-muted); margin-top:3px; }
+  .notif-item.warning { background:rgba(255,179,71,0.1); color:var(--warning); }
+  .notif-item.danger  { background:rgba(255,71,87,0.1);  color:var(--danger); }
+  .notif-item.info    { background:rgba(108,99,255,0.1); color:var(--primary-light); }
+  .notif-item.success { background:rgba(67,233,123,0.1); color:var(--accent); }
+</style>
+
+<script src="auth.js"></script>
+<script src="utils.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
