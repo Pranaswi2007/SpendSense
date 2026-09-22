@@ -234,8 +234,25 @@
 .cta-content p  { font-size:1rem; color:rgba(34,57,111,0.68); margin-bottom:36px; }
 /* Buttons inside CTA need navy style */
 .cta-content .btn-primary  { background:var(--navy); color:#FCF1D0; box-shadow:0 4px 18px rgba(34,57,111,0.30); }
+.cta-content .btn-primary:hover { background:#192C57; box-shadow:0 8px 28px rgba(34,57,111,0.42); }
 .cta-content .btn-secondary { border-color:rgba(34,57,111,0.40); color:#22396F; }
 .cta-content .btn-secondary:hover { background:rgba(34,57,111,0.08); }
+/* "SpendSense" text in CTA headline — navy on cream */
+.cta-content .gradient-text {
+  background: linear-gradient(135deg, #22396F 0%, #2E4A8C 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* "Get Started" navbar button — always navy bg so it's visible on both dark and light sections */
+.nav-links .btn-primary {
+  background: var(--navy);
+  color: #FCF1D0;
+  box-shadow: 0 2px 12px rgba(34,57,111,0.25);
+}
+.nav-links .btn-primary:hover {
+  background: #192C57;
+  box-shadow: 0 4px 18px rgba(34,57,111,0.40);
+}
 
 /* ======================================================
    FOOTER
