@@ -151,18 +151,13 @@ function renderSalaryBar() {
 }
 
 // ---- UPDATE SALARY ----
-async function updateSalary() {
+function updateSalary() {
   const val = parseInt(document.getElementById('salaryInput')?.value);
   if (!val || val < 1000) { showToast('Please enter a valid salary (min ₹1,000)', 'warning'); return; }
-  try {
-    await apiSaveSalary(val);
-    saveData('salary', val);
-    renderSalaryBar();
-    renderRadarChart();
-    showToast('Salary updated to ' + formatCurrency(val), 'success');
-  } catch(err) {
-    showToast(err.message || 'Could not update salary.', 'danger');
-  }
+  saveData('salary', val);
+  renderSalaryBar();
+  renderRadarChart();
+  showToast('Salary updated to ' + formatCurrency(val), 'success');
 }
 
 // ---- RADAR CHART ----
@@ -431,24 +426,10 @@ function loadBudgets() {
 }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', function () {
   const session = requireAuth();
   if (!session) return;
-  applyUserGreeting();
-
-  try {
-    const [salary, budgets, expenses] = await Promise.all([
-      apiFetchSalary(),
-      apiFetchBudgets(),
-      loadExpenses(),
-    ]);
-    const norm = arr => arr.map(x => ({ ...x, id: x._id || x.id }));
-    saveData('salary',   salary);
-    saveData('budgets',  norm(budgets));
-    saveData('expenses', norm(expenses));
-  } catch(err) {
-    showToast('Could not load data. Is the server running?', 'danger', 5000);
-  }
+  initPageData();
 
   const savedSalary = loadData('salary', 0);
   const salaryInput = document.getElementById('salaryInput');
@@ -457,9 +438,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   loadBudgets();
 
   const params = new URLSearchParams(window.location.search);
-  if (params.get('planner') === '1') {
-    setTimeout(() => openSmartPlanner(), 400);
-  }
+  if (params.get('planner') === '1') setTimeout(() => openSmartPlanner(), 400);
 });
 
 // ================================================================
@@ -767,28 +746,21 @@ function renderPlanPreview() {
   `;
 }
 
-async function applyPlannerBudget() {
+function applyPlannerBudget() {
   if (generatedPlan.length === 0) return;
   const salary = parseFloat(document.getElementById('plannerSalary').value);
-  try {
-    await apiSaveSalary(salary);
-    saveData('salary', salary);
-    const budgetPayload = generatedPlan.map(b => ({
-      category: b.key, limit: b.limit, threshold: b.threshold, customLabel: null,
-    }));
-    const created = await apiReplaceBudgets(budgetPayload);
-    const norm = created.map(x => ({ ...x, id: x._id || x.id }));
-    saveData('budgets', norm);
-
-    const salaryInput = document.getElementById('salaryInput');
-    if (salaryInput) salaryInput.value = salary;
-
-    closeModal('smartPlannerModal');
-    loadBudgets();
-    showToast(`✨ Budget plan applied! ${norm.length} categories set up.`, 'success', 4000);
-  } catch(err) {
-    showToast(err.message || 'Could not apply plan.', 'danger');
-  }
+  saveData('salary', salary);
+  let nextId = 1;
+  const budgets = generatedPlan.map(b => ({
+    id: nextId++, category: b.key, limit: b.limit, threshold: b.threshold, customLabel: null,
+  }));
+  saveData('budgets', budgets);
+  saveData('nextBudgetId', nextId);
+  const salaryInput = document.getElementById('salaryInput');
+  if (salaryInput) salaryInput.value = salary;
+  closeModal('smartPlannerModal');
+  loadBudgets();
+  showToast(`✨ Budget plan applied! ${budgets.length} categories set up.`, 'success', 4000);
 }
 
 // Toggle custom savings input visibility + step indicator wiring

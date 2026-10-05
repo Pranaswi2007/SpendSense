@@ -509,35 +509,15 @@ function dashboardSearch(query) {
 }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', function () {
   const session = requireAuth();
   if (!session) return;
-  applyUserGreeting();
+  initPageData();
 
-  // Load expenses and salary from API into cache
-  try {
-    const now = new Date();
-    const [expenses, salary, budgets, reminders] = await Promise.all([
-      loadExpenses(),
-      apiFetchSalary(),
-      apiFetchBudgets(),
-      apiFetchReminders(),
-    ]);
-    // Normalize _id → id for compatibility
-    const normalizeId = arr => arr.map(x => ({ ...x, id: x._id || x.id }));
-    saveData('expenses',  normalizeId(expenses));
-    saveData('salary',    salary);
-    saveData('budgets',   normalizeId(budgets));
-    saveData('reminders', normalizeId(reminders));
-  } catch(err) {
-    console.error('Failed to load data:', err.message);
-    showToast('Could not load data. Is the server running?', 'danger', 5000);
-  }
-
-  const expenses = loadData('expenses', []);
-  const salary   = loadData('salary', 0);
-  const hasData  = expenses.length > 0 || salary > 0;
-  const neverSetUp = false; // API users always get the full dashboard
+  const expenses  = loadData('expenses', []);
+  const salary    = loadData('salary', 0);
+  const hasData   = expenses.length > 0 || salary > 0;
+  const neverSetUp = !loadData('initialized');
 
   if (hasData || !neverSetUp) {
     renderFullDashboard();

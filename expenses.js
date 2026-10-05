@@ -286,30 +286,24 @@ function showBudgetHint(category) {
 // ---- ADD EXPENSE ----
 async function addExpense(e) {
   e.preventDefault();
-
   const name     = document.getElementById('expName').value.trim();
   const amount   = parseFloat(document.getElementById('expAmount').value);
   const date     = document.getElementById('expDate').value;
   const category = document.getElementById('expCategory').value;
   const payment  = document.getElementById('expPayment').value;
   const notes    = document.getElementById('expNotes').value.trim();
-
-  try {
-    const newExp = await apiAddExpense({ name, amount, date, category, payment, notes });
-    const expenses = loadData('expenses', []);
-    expenses.unshift({ ...newExp, id: newExp._id });
-    saveData('expenses', expenses);
-
-    closeModal('addExpenseModal');
-    e.target.reset();
-    const hint = document.getElementById('budgetHint');
-    if (hint) hint.innerHTML = '';
-    filterExpenses();
-    showToast(`Expense "${name}" added!`, 'success');
-    checkBudgetAfterAdd(category, amount);
-  } catch(err) {
-    showToast(err.message || 'Could not add expense.', 'danger');
-  }
+  const expenses = loadData('expenses', []);
+  let nextId = loadData('nextExpenseId', 1);
+  expenses.push({ id: nextId++, name, amount, date, category, payment, notes });
+  saveData('expenses', expenses);
+  saveData('nextExpenseId', nextId);
+  closeModal('addExpenseModal');
+  e.target.reset();
+  const hint = document.getElementById('budgetHint');
+  if (hint) hint.innerHTML = '';
+  filterExpenses();
+  showToast(`Expense "${name}" added!`, 'success');
+  checkBudgetAfterAdd(category, amount);
 }
 
 function checkBudgetAfterAdd(category, amount) {
@@ -350,26 +344,22 @@ function editExpense(id) {
 
 async function saveEditExpense(e) {
   e.preventDefault();
-  const id = document.getElementById('editExpId').value;
-  const data = {
+  const id = parseInt(document.getElementById('editExpId').value);
+  const expenses = loadData('expenses', []);
+  const idx = expenses.findIndex(ex => ex.id === id);
+  if (idx === -1) return;
+  expenses[idx] = {
+    ...expenses[idx],
     name:     document.getElementById('editExpName').value.trim(),
     amount:   parseFloat(document.getElementById('editExpAmount').value),
     date:     document.getElementById('editExpDate').value,
     category: document.getElementById('editExpCategory').value,
     payment:  document.getElementById('editExpPayment').value,
   };
-  try {
-    const updated = await apiUpdateExpense(id, data);
-    const expenses = loadData('expenses', []);
-    const idx = expenses.findIndex(ex => (ex._id || ex.id) === id);
-    if (idx !== -1) expenses[idx] = { ...updated, id: updated._id };
-    saveData('expenses', expenses);
-    closeModal('editExpenseModal');
-    filterExpenses();
-    showToast('Expense updated!', 'success');
-  } catch(err) {
-    showToast(err.message || 'Could not update expense.', 'danger');
-  }
+  saveData('expenses', expenses);
+  closeModal('editExpenseModal');
+  filterExpenses();
+  showToast('Expense updated!', 'success');
 }
   filterExpenses();
   showToast('Expense updated!', 'success');
@@ -378,15 +368,10 @@ async function saveEditExpense(e) {
 // ---- DELETE EXPENSE ----
 async function deleteExpense(id) {
   if (!confirm('Delete this expense?')) return;
-  try {
-    await apiDeleteExpense(id);
-    const expenses = loadData('expenses', []).filter(e => (e._id || e.id) !== id);
-    saveData('expenses', expenses);
-    filterExpenses();
-    showToast('Expense deleted.', 'info');
-  } catch(err) {
-    showToast(err.message || 'Could not delete expense.', 'danger');
-  }
+  const expenses = loadData('expenses', []).filter(e => e.id !== id);
+  saveData('expenses', expenses);
+  filterExpenses();
+  showToast('Expense deleted.', 'info');
 }
 
 // ---- EXPORT CSV ----
@@ -407,25 +392,11 @@ function exportCSV() {
 }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', function () {
   const session = requireAuth();
   if (!session) return;
-  applyUserGreeting();
+  initPageData();
 
-  // Load all expenses + budgets from API into cache
-  try {
-    const [expenses, budgets] = await Promise.all([
-      loadExpenses(),
-      apiFetchBudgets(),
-    ]);
-    const norm = arr => arr.map(x => ({ ...x, id: x._id || x.id }));
-    saveData('expenses', norm(expenses));
-    saveData('budgets',  norm(budgets));
-  } catch(err) {
-    showToast('Could not load data. Is the server running?', 'danger', 5000);
-  }
-
-  // Populate month filter
   const monthFilter = document.getElementById('monthFilter');
   if (monthFilter) {
     const now = new Date();
@@ -433,8 +404,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     monthNames.forEach((name, i) => {
       const opt = document.createElement('option');
-      opt.value = i + 1;
-      opt.textContent = name;
+      opt.value = i + 1; opt.textContent = name;
       if (i + 1 === currentMonth) opt.selected = true;
       monthFilter.appendChild(opt);
     });
@@ -446,10 +416,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   const params = new URLSearchParams(window.location.search);
   const searchQ = params.get('search');
-  if (searchQ) {
-    const txSearch = document.getElementById('txSearch');
-    if (txSearch) txSearch.value = searchQ;
-  }
+  if (searchQ) { const tx = document.getElementById('txSearch'); if (tx) tx.value = searchQ; }
 
   filterExpenses();
   renderExpenseTrendChart();

@@ -194,33 +194,35 @@ function importData(input) {
 }
 
 // ---- RESET DATA ----
-async function resetAllData() {
+function resetAllData() {
   if (!confirm('⚠️ This will delete ALL your expenses, budgets, goals and reminders. This cannot be undone. Are you absolutely sure?')) return;
-  try {
-    await apiResetAllData();
-    showToast('All data reset. Starting fresh!', 'info');
-    setTimeout(() => window.location.href = 'dashboard.html', 1500);
-  } catch(err) {
-    showToast(err.message || 'Could not reset data.', 'danger');
-  }
+  const session = getSession(); if (!session) return;
+  const prefix = `ss_user_${session.uid}_`;
+  Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => localStorage.removeItem(k));
+  const emptyKeys = ['expenses','budgets','reminders','goals'];
+  emptyKeys.forEach(k => localStorage.setItem(`${prefix}${k}`, JSON.stringify([])));
+  ['nextExpenseId','nextBudgetId','nextReminderId','nextGoalId'].forEach(k => localStorage.setItem(`${prefix}${k}`, JSON.stringify(1)));
+  localStorage.setItem(`${prefix}salary`,      JSON.stringify(0));
+  localStorage.setItem(`${prefix}initialized`, JSON.stringify(true));
+  showToast('All data reset. Starting fresh!', 'info');
+  setTimeout(() => window.location.href = 'dashboard.html', 1500);
 }
 
 // ---- DELETE ACCOUNT ----
-async function deleteAccount() {
+function deleteAccount() {
   if (!confirm('⛔ This will permanently delete your SpendSense account and ALL data. This CANNOT be undone. Confirm?')) return;
-  try {
-    await apiDeleteAccount();
-    removeToken();
-    removeSession();
-    showToast('Account deleted. Goodbye!', 'info');
-    setTimeout(() => window.location.href = 'auth.html', 1500);
-  } catch(err) {
-    showToast(err.message || 'Could not delete account.', 'danger');
-  }
+  const session = getSession(); if (!session) return;
+  const prefix = `ss_user_${session.uid}_`;
+  Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => localStorage.removeItem(k));
+  const users = JSON.parse(localStorage.getItem('ss_users')||'[]').filter(u => u.uid !== session.uid);
+  localStorage.setItem('ss_users', JSON.stringify(users));
+  localStorage.removeItem('ss_session');
+  showToast('Account deleted. Goodbye!', 'info');
+  setTimeout(() => window.location.href = 'auth.html', 1500);
 }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   const session = requireAuth();
   if (!session) return;
   applyUserGreeting();
