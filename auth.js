@@ -1,13 +1,13 @@
 /* ============================================
-   SPENDSENSE - Authentication Logic
+   SPENDSENSE - Authentication Logic (localStorage)
 ============================================ */
 
 // ---- TAB SWITCH ----
 function switchAuthTab(tab) {
-  document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+  document.getElementById('loginForm').classList.toggle('active',  tab === 'login');
   document.getElementById('signupForm').classList.toggle('active', tab === 'signup');
-  document.getElementById('loginTab').classList.toggle('active', tab === 'login');
-  document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+  document.getElementById('loginTab').classList.toggle('active',   tab === 'login');
+  document.getElementById('signupTab').classList.toggle('active',  tab === 'signup');
   clearErrors();
 }
 
@@ -29,32 +29,31 @@ function togglePwd(inputId, icon) {
 
 // ---- PASSWORD STRENGTH ----
 function checkStrength(val) {
-  const segs = ['s1','s2','s3','s4'];
+  const segs  = ['s1','s2','s3','s4'];
   const label = document.getElementById('strengthLabel');
-  let score = 0;
-  if (val.length >= 8) score++;
-  if (/[A-Z]/.test(val)) score++;
-  if (/[0-9]/.test(val)) score++;
+  let score   = 0;
+  if (val.length >= 8)          score++;
+  if (/[A-Z]/.test(val))        score++;
+  if (/[0-9]/.test(val))        score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
 
-  const colors = ['#FF4757','#FFB347','#43E97B','#6C63FF'];
-  const labels = ['Weak','Fair','Good','Strong'];
-  const labelColors = ['var(--danger)','var(--warning)','var(--accent)','var(--primary-light)'];
+  const colors      = ['#F0A0A0','#F0BC78','#A8E6BF','#FCF1D0'];
+  const labels      = ['Weak','Fair','Good','Strong'];
+  const labelColors = ['#F0A0A0','#F0BC78','#A8E6BF','#FCF1D0'];
 
   segs.forEach((id, i) => {
-    document.getElementById(id).style.background = i < score ? colors[score - 1] : 'rgba(255,255,255,0.08)';
+    const el = document.getElementById(id);
+    if (el) el.style.background = i < score ? colors[score-1] : 'rgba(255,255,255,0.08)';
   });
-  label.textContent = val.length > 0 ? labels[score - 1] || 'Weak' : '';
-  label.style.color = val.length > 0 ? labelColors[score - 1] || 'var(--danger)' : 'var(--text-dark)';
+  if (label) {
+    label.textContent = val.length > 0 ? (labels[score-1] || 'Weak') : '';
+    label.style.color = val.length > 0 ? (labelColors[score-1] || '#F0A0A0') : 'var(--text-dark)';
+  }
 }
 
 // ---- USER STORAGE ----
-function getUsers() {
-  return JSON.parse(localStorage.getItem('ss_users') || '[]');
-}
-function saveUsers(users) {
-  localStorage.setItem('ss_users', JSON.stringify(users));
-}
+function getUsers()          { return JSON.parse(localStorage.getItem('ss_users') || '[]'); }
+function saveUsers(users)    { localStorage.setItem('ss_users', JSON.stringify(users)); }
 function getUserByEmail(email) {
   return getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
 }
@@ -62,25 +61,23 @@ function getUserByEmail(email) {
 // ---- SESSION ----
 function createSession(user, remember) {
   const session = {
-    uid: user.uid,
-    email: user.email,
+    uid:       user.uid,
+    email:     user.email,
     firstName: user.firstName,
-    lastName: user.lastName,
-    phone: user.phone,
-    avatar: user.avatar || '😊',
+    lastName:  user.lastName,
+    phone:     user.phone,
+    avatar:    user.avatar || '😊',
     createdAt: user.createdAt,
     loginTime: Date.now(),
   };
   localStorage.setItem('ss_session', JSON.stringify(session));
-  if (remember) {
-    localStorage.setItem('ss_remember', user.email);
-  } else {
-    localStorage.removeItem('ss_remember');
-  }
+  if (remember) localStorage.setItem('ss_remember', user.email);
+  else          localStorage.removeItem('ss_remember');
 }
 
 function getSession() {
-  try { return JSON.parse(localStorage.getItem('ss_session') || 'null'); } catch(e) { return null; }
+  try { return JSON.parse(localStorage.getItem('ss_session') || 'null'); }
+  catch(e) { return null; }
 }
 
 function logout() {
@@ -88,7 +85,6 @@ function logout() {
   window.location.href = 'auth.html';
 }
 
-// ---- AUTH GUARD (call on every protected page) ----
 function requireAuth() {
   const session = getSession();
   if (!session || !session.uid) {
@@ -107,71 +103,61 @@ function getGreeting() {
   return 'Good Night';
 }
 
-// ---- PERSONALIZED GREETING IN TOPBAR ----
 function applyUserGreeting() {
   const session = getSession();
   if (!session) return;
   const greetEl = document.getElementById('userGreeting');
   if (greetEl) greetEl.textContent = `${getGreeting()}, ${session.firstName} 👋`;
-  // avatar initials
   document.querySelectorAll('.user-avatar-init').forEach(el => {
-    el.textContent = (session.firstName.charAt(0) + (session.lastName ? session.lastName.charAt(0) : '')).toUpperCase();
+    const av = session.avatar;
+    if (av && av.length <= 2 && /\p{Emoji}/u.test(av)) {
+      el.textContent = av; el.style.fontSize = '1.2rem';
+    } else {
+      el.textContent = (session.firstName.charAt(0) + (session.lastName ? session.lastName.charAt(0) : '')).toUpperCase();
+    }
   });
-  // sidebar user info
   const sidebarName = document.getElementById('sidebarUserName');
   const sidebarRole = document.getElementById('sidebarUserRole');
-  if (sidebarName) sidebarName.textContent = `${session.firstName} ${session.lastName}`;
-  if (sidebarRole) {
-    sidebarRole.textContent = session.uid === 'demo_user' ? 'Demo Account' : 'Free Plan';
-  }
+  if (sidebarName) sidebarName.textContent = `${session.firstName} ${session.lastName || ''}`.trim();
+  if (sidebarRole) sidebarRole.textContent  = session.uid === 'demo_user' ? 'Demo Account' : 'Free Plan';
 }
 
 // ---- USER-SCOPED DATA KEY ----
 function userKey(key) {
   const session = getSession();
-  if (!session) return key;
-  return `ss_user_${session.uid}_${key}`;
+  return session ? `ss_user_${session.uid}_${key}` : `ss_anon_${key}`;
 }
-
-// Wrap save/load to be user-scoped
-function saveUserData(key, data) {
-  localStorage.setItem(userKey(key), JSON.stringify(data));
-}
+function saveUserData(key, data) { localStorage.setItem(userKey(key), JSON.stringify(data)); }
 function loadUserData(key, defaultVal = null) {
   const stored = localStorage.getItem(userKey(key));
   return stored !== null ? JSON.parse(stored) : defaultVal;
-}
-
-// Check if current user has any data yet (fresh user)
-function isNewUser() {
-  return !localStorage.getItem(userKey('initialized'));
 }
 
 // ---- HANDLE LOGIN ----
 function handleLogin(e) {
   e.preventDefault();
   clearErrors();
-  const email = document.getElementById('lgEmail').value.trim();
-  const pass  = document.getElementById('lgPass').value;
+  const email    = document.getElementById('lgEmail').value.trim();
+  const pass     = document.getElementById('lgPass').value;
   const remember = document.getElementById('rememberMe')?.checked;
 
   let valid = true;
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    setError('lg-email-grp', 'lg-email-err', 'Please enter a valid email.'); valid = false;
+    setError('lg-email-grp','lg-email-err','Please enter a valid email.'); valid = false;
   }
   if (!pass) {
-    setError('lg-pass-grp', 'lg-pass-err', 'Please enter your password.'); valid = false;
+    setError('lg-pass-grp','lg-pass-err','Please enter your password.'); valid = false;
   }
   if (!valid) return;
 
   const user = getUserByEmail(email);
   if (!user || user.password !== btoa(pass)) {
-    setError('lg-pass-grp', 'lg-pass-err', 'Incorrect email or password.'); return;
+    setError('lg-pass-grp','lg-pass-err','Incorrect email or password.'); return;
   }
 
   const btn = document.getElementById('loginBtn');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
+  btn.disabled  = true;
 
   setTimeout(() => {
     createSession(user, remember);
@@ -194,9 +180,13 @@ function handleSignup(e) {
 
   let valid = true;
   if (!firstName) { setError('sg-fname-grp','sg-fname-err','Enter your first name.'); valid = false; }
-  if (!lastName)  { setError('sg-lname-grp','sg-lname-err','Enter your last name.'); valid = false; }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('sg-email-grp','sg-email-err','Enter a valid email.'); valid = false; }
-  if (!/^\d{10}$/.test(phone)) { setError('sg-phone-grp','sg-phone-err','Enter a valid 10-digit number.'); valid = false; }
+  if (!lastName)  { setError('sg-lname-grp','sg-lname-err','Enter your last name.');  valid = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setError('sg-email-grp','sg-email-err','Enter a valid email.'); valid = false;
+  }
+  if (!/^\d{10}$/.test(phone)) {
+    setError('sg-phone-grp','sg-phone-err','Enter a valid 10-digit number.'); valid = false;
+  }
   if (pass.length < 8) { setError('sg-pass-grp','sg-pass-err','Password must be at least 8 characters.'); valid = false; }
   if (pass !== cpass)  { setError('sg-cpass-grp','sg-cpass-err','Passwords do not match.'); valid = false; }
   if (!terms) { showToast('Please accept the Terms of Service.', 'warning'); valid = false; }
@@ -208,12 +198,17 @@ function handleSignup(e) {
   }
 
   const btn = document.getElementById('signupBtn');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
-  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account…';
+  btn.disabled  = true;
 
   setTimeout(() => {
-    const uid = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-    const newUser = { uid, firstName, lastName, email, phone, password: btoa(pass), createdAt: new Date().toISOString(), avatar: '😊' };
+    const uid     = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    const newUser = {
+      uid, firstName, lastName, email, phone,
+      password:  btoa(pass),
+      createdAt: new Date().toISOString(),
+      avatar:    '😊',
+    };
     users.push(newUser);
     saveUsers(users);
     createSession(newUser, false);
@@ -227,25 +222,27 @@ function demoLogin() {
   const users = getUsers();
   let demoUser = users.find(u => u.email === 'demo@spendsense.in');
   if (!demoUser) {
-    const uid = 'demo_user';
-    demoUser = { uid, firstName: 'Demo', lastName: 'User', email: 'demo@spendsense.in', phone: '9999999999', password: btoa('demo1234'), createdAt: new Date().toISOString(), avatar: '🚀' };
+    demoUser = {
+      uid: 'demo_user', firstName:'Demo', lastName:'User',
+      email:'demo@spendsense.in', phone:'9999999999',
+      password: btoa('demo1234'),
+      createdAt: new Date().toISOString(), avatar:'🚀',
+    };
     users.push(demoUser);
     saveUsers(users);
   }
   createSession(demoUser, false);
-  showToast('Welcome to the Demo! 🚀', 'success');
+  showToast('Welcome to the SpendSense Demo! 🚀', 'success');
   setTimeout(() => { window.location.href = 'dashboard.html'; }, 700);
 }
 
 // ---- FORGOT PASSWORD ----
-function showForgotPassword() {
-  openModal('forgotModal');
-}
+function showForgotPassword() { openModal('forgotModal'); }
 function sendResetLink() {
   const email = document.getElementById('forgotEmail').value.trim();
   if (!email) { showToast('Enter your email address.', 'warning'); return; }
   const user = getUserByEmail(email);
-  if (!user) { showToast('No account found with that email.', 'danger'); return; }
+  if (!user)  { showToast('No account found with that email.', 'danger'); return; }
   closeModal('forgotModal');
   showToast('Password reset link sent! Check your email.', 'success', 5000);
 }
@@ -259,10 +256,36 @@ function setError(groupId, errId, msg) {
 
 function openModal(id)  { document.getElementById(id)?.classList.add('active'); }
 function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
-document.addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('active'); });
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('active');
+});
+
+function showToast(message, type = 'info', duration = 3500) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const icons = { success:'✅', warning:'⚠️', danger:'❌', info:'ℹ️' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'slideOutRight 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
 
 // ---- PRE-FILL REMEMBERED EMAIL ----
 document.addEventListener('DOMContentLoaded', () => {
+  // Only run auth-page logic when we are actually on auth.html
+  if (!document.getElementById('loginForm')) return;
+
+  // If already logged in, go straight to dashboard
+  const session = getSession();
+  if (session && session.uid) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
   const remembered = localStorage.getItem('ss_remember');
   if (remembered) {
     const lgEmail = document.getElementById('lgEmail');

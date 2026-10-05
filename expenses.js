@@ -226,6 +226,63 @@ function setChip(el, cat) {
   filterExpenses();
 }
 
+// ---- BUDGET HINT (shown when category is selected in Add Expense modal) ----
+function showBudgetHint(category) {
+  const hint = document.getElementById('budgetHint');
+  if (!hint) return;
+
+  if (!category) { hint.innerHTML = ''; return; }
+
+  const budgets  = loadData('budgets', []);
+  const budget   = budgets.find(b => b.category === category);
+  const hint_div = hint;
+
+  if (!budget) {
+    hint_div.innerHTML = `
+      <div style="font-size:0.78rem;color:var(--text-muted);padding:6px 10px;background:rgba(252,241,208,0.06);border-radius:6px;border:1px solid rgba(252,241,208,0.10)">
+        <i class="fas fa-info-circle" style="margin-right:5px"></i>No budget set for this category.
+        <a href="budget.html" style="color:var(--secondary);margin-left:4px;text-decoration:underline">Set one →</a>
+      </div>`;
+    return;
+  }
+
+  // Calculate how much already spent this month in this category
+  const now      = new Date();
+  const expenses = loadData('expenses', []);
+  const spent    = expenses
+    .filter(e => {
+      const d = new Date(e.date);
+      return e.category === category &&
+             d.getMonth() === now.getMonth() &&
+             d.getFullYear() === now.getFullYear();
+    })
+    .reduce((s, e) => s + e.amount, 0);
+
+  const remaining = budget.limit - spent;
+  const pct       = Math.round((spent / budget.limit) * 100);
+  const isOver    = remaining < 0;
+  const barColor  = isOver ? '#F0A0A0' : pct >= budget.threshold ? '#F0BC78' : '#A8E6BF';
+  const textColor = isOver ? '#F0A0A0' : pct >= budget.threshold ? '#F0BC78' : '#A8E6BF';
+
+  hint_div.innerHTML = `
+    <div style="padding:8px 12px;background:rgba(252,241,208,0.07);border:1px solid rgba(252,241,208,0.14);border-radius:6px;font-size:0.78rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="color:var(--text-muted)">
+          <i class="fas fa-wallet" style="margin-right:4px"></i>Budget: <strong style="color:var(--cream)">${formatCurrency(budget.limit)}/mo</strong>
+        </span>
+        <span style="color:${textColor};font-weight:600">
+          ${isOver
+            ? `⚠️ ${formatCurrency(Math.abs(remaining))} over budget`
+            : `${formatCurrency(remaining)} remaining`}
+        </span>
+      </div>
+      <div style="background:rgba(252,241,208,0.10);border-radius:50px;height:5px;overflow:hidden">
+        <div style="width:${Math.min(pct,100)}%;height:100%;background:${barColor};border-radius:50px;transition:width 0.5s ease"></div>
+      </div>
+      <div style="color:var(--text-muted);margin-top:4px">${formatCurrency(spent)} spent of ${formatCurrency(budget.limit)} (${pct}%)</div>
+    </div>`;
+}
+
 // ---- ADD EXPENSE ----
 function addExpense(e) {
   e.preventDefault();
@@ -246,6 +303,8 @@ function addExpense(e) {
 
   closeModal('addExpenseModal');
   e.target.reset();
+  const hint = document.getElementById('budgetHint');
+  if (hint) hint.innerHTML = '';
   filterExpenses();
   showToast(`Expense "${name}" added!`, 'success');
 
