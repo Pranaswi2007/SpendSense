@@ -151,13 +151,18 @@ function renderSalaryBar() {
 }
 
 // ---- UPDATE SALARY ----
-function updateSalary() {
+async function updateSalary() {
   const val = parseInt(document.getElementById('salaryInput')?.value);
   if (!val || val < 1000) { showToast('Please enter a valid salary (min ₹1,000)', 'warning'); return; }
-  saveData('salary', val);
-  renderSalaryBar();
-  renderRadarChart();
-  showToast('Salary updated to ' + formatCurrency(val), 'success');
+  try {
+    await apiSaveSalary(val);
+    saveData('salary', val);
+    renderSalaryBar();
+    renderRadarChart();
+    showToast('Salary updated to ' + formatCurrency(val), 'success');
+  } catch(err) {
+    showToast(err.message || 'Could not update salary.', 'danger');
+  }
 }
 
 // ---- RADAR CHART ----
@@ -306,6 +311,24 @@ function renderSmartTips() {
 }
 
 // ---- ADD BUDGET ----
+// Categories where a budget limit alert makes no sense — fixed monthly commitments
+const NO_ALERT_CATS = new Set(['rent','emi','insurance','health','utilities']);
+
+function toggleThresholdField(category) {
+  const group = document.getElementById('budgetThresholdGroup');
+  if (!group) return;
+  if (NO_ALERT_CATS.has(category)) {
+    group.style.display = 'none';
+    // Force threshold to 101 (never trigger) for fixed categories
+    const sel = document.getElementById('budgetThreshold');
+    if (sel) sel.value = '101';
+  } else {
+    group.style.display = 'block';
+    const sel = document.getElementById('budgetThreshold');
+    if (sel && sel.value === '101') sel.value = '80';
+  }
+}
+
 // ---- CUSTOM BUDGET NAME TOGGLE ----
 function toggleCustomBudgetName(val) {
   const group = document.getElementById('customBudgetNameGroup');
@@ -348,7 +371,8 @@ function addBudget(e) {
 
   closeModal('addBudgetModal');
   e.target.reset();
-  toggleCustomBudgetName('');   // hide custom field after reset
+  toggleCustomBudgetName('');
+  toggleThresholdField('');   // show threshold field again for next time
   loadBudgets();
   showToast(`Budget set for ${getCategoryInfo(category, customLabel).label}!`, 'success');
 }
@@ -407,19 +431,31 @@ function loadBudgets() {
 }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   const session = requireAuth();
   if (!session) return;
-  initPageData();
+  applyUserGreeting();
 
-  // Pre-fill salary input from saved data
+  try {
+    const [salary, budgets, expenses] = await Promise.all([
+      apiFetchSalary(),
+      apiFetchBudgets(),
+      loadExpenses(),
+    ]);
+    const norm = arr => arr.map(x => ({ ...x, id: x._id || x.id }));
+    saveData('salary',   salary);
+    saveData('budgets',  norm(budgets));
+    saveData('expenses', norm(expenses));
+  } catch(err) {
+    showToast('Could not load data. Is the server running?', 'danger', 5000);
+  }
+
   const savedSalary = loadData('salary', 0);
   const salaryInput = document.getElementById('salaryInput');
   if (salaryInput && savedSalary > 0) salaryInput.value = savedSalary;
 
   loadBudgets();
 
-  // Auto-open Smart Planner if ?planner=1 in URL
   const params = new URLSearchParams(window.location.search);
   if (params.get('planner') === '1') {
     setTimeout(() => openSmartPlanner(), 400);
@@ -731,31 +767,28 @@ function renderPlanPreview() {
   `;
 }
 
-function applyPlannerBudget() {
+async function applyPlannerBudget() {
   if (generatedPlan.length === 0) return;
-
   const salary = parseFloat(document.getElementById('plannerSalary').value);
-  saveData('salary', salary);
+  try {
+    await apiSaveSalary(salary);
+    saveData('salary', salary);
+    const budgetPayload = generatedPlan.map(b => ({
+      category: b.key, limit: b.limit, threshold: b.threshold, customLabel: null,
+    }));
+    const created = await apiReplaceBudgets(budgetPayload);
+    const norm = created.map(x => ({ ...x, id: x._id || x.id }));
+    saveData('budgets', norm);
 
-  let nextId = 1;
-  const budgets = generatedPlan.map(b => ({
-    id:          nextId++,
-    category:    b.key,
-    limit:       b.limit,
-    threshold:   b.threshold,
-    customLabel: null,
-  }));
+    const salaryInput = document.getElementById('salaryInput');
+    if (salaryInput) salaryInput.value = salary;
 
-  saveData('budgets', budgets);
-  saveData('nextBudgetId', nextId);
-
-  closeModal('smartPlannerModal');
-  loadBudgets();
-
-  const salaryInput = document.getElementById('salaryInput');
-  if (salaryInput) salaryInput.value = salary;
-
-  showToast(`✨ Budget plan applied! ${budgets.length} categories set up.`, 'success', 4000);
+    closeModal('smartPlannerModal');
+    loadBudgets();
+    showToast(`✨ Budget plan applied! ${norm.length} categories set up.`, 'success', 4000);
+  } catch(err) {
+    showToast(err.message || 'Could not apply plan.', 'danger');
+  }
 }
 
 // Toggle custom savings input visibility + step indicator wiring

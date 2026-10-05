@@ -282,13 +282,20 @@ function deleteGoal(id) {
 function setTxt(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const session = requireAuth();
   if (!session) return;
-  initPageData();
   applyUserGreeting();
 
-  // Set default target date to 6 months from now
+  try {
+    const [goals, budgets] = await Promise.all([apiFetchGoals(), apiFetchBudgets()]);
+    const norm = arr => arr.map(x => ({ ...x, id: x._id || x.id }));
+    saveData('goals',   norm(goals));
+    saveData('budgets', norm(budgets));
+  } catch(err) {
+    showToast('Could not load data. Is the server running?', 'danger', 5000);
+  }
+
   const d = new Date(); d.setMonth(d.getMonth() + 6);
   const df = document.getElementById('goalDate');
   if (df) df.value = d.toISOString().split('T')[0];

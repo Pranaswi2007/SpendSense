@@ -603,10 +603,27 @@ function renderInsightBanner() {
 }
 
 /* ---- INIT ---- */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const session = requireAuth();
   if (!session) return;
   applyUserGreeting();
+
+  try {
+    const [expenses, budgets, goals, salary] = await Promise.all([
+      loadExpenses(),
+      apiFetchBudgets(),
+      apiFetchGoals(),
+      apiFetchSalary(),
+    ]);
+    const norm = arr => arr.map(x => ({ ...x, id: x._id || x.id }));
+    saveData('expenses', norm(expenses));
+    saveData('budgets',  norm(budgets));
+    saveData('goals',    norm(goals));
+    saveData('salary',   salary);
+  } catch(err) {
+    console.error('Tips page data load error:', err.message);
+  }
+
   renderInsightBanner();
   renderGoalLinkedSuggestions();
   renderSpendingAnalysis();

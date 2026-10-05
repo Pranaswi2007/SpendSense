@@ -194,59 +194,35 @@ function importData(input) {
 }
 
 // ---- RESET DATA ----
-function resetAllData() {
-  if (!confirm('⚠️ This will delete ALL your expenses, budgets, goals and linked banks. This cannot be undone. Are you absolutely sure?')) return;
-  const session = getSession();
-  if (!session) return;
-  // Clear all user-scoped data
-  const prefix = `ss_user_${session.uid}_`;
-  Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => localStorage.removeItem(k));
-
-  // Re-seed empty data so initPageData() doesn't re-populate demo data on next load
-  const emptyKeys = ['expenses','budgets','reminders','bankAccounts','payments','payees','goals'];
-  emptyKeys.forEach(k => localStorage.setItem(`${prefix}${k}`, JSON.stringify([])));
-  ['nextExpenseId','nextBudgetId','nextReminderId','nextBankId','nextPaymentId','nextPayeeId','nextGoalId']
-    .forEach(k => localStorage.setItem(`${prefix}${k}`, JSON.stringify(1)));
-  localStorage.setItem(`${prefix}salary`,             JSON.stringify(0));
-  localStorage.setItem(`${prefix}initialized`,        JSON.stringify(true));
-  localStorage.setItem(`${prefix}dismissedNotifKeys`, JSON.stringify([]));
-
-  showToast('All data reset. Starting fresh!', 'info');
-  setTimeout(() => window.location.href = 'dashboard.html', 1500);
+async function resetAllData() {
+  if (!confirm('⚠️ This will delete ALL your expenses, budgets, goals and reminders. This cannot be undone. Are you absolutely sure?')) return;
+  try {
+    await apiResetAllData();
+    showToast('All data reset. Starting fresh!', 'info');
+    setTimeout(() => window.location.href = 'dashboard.html', 1500);
+  } catch(err) {
+    showToast(err.message || 'Could not reset data.', 'danger');
+  }
 }
 
 // ---- DELETE ACCOUNT ----
-function deleteAccount() {
+async function deleteAccount() {
   if (!confirm('⛔ This will permanently delete your SpendSense account and ALL data. This CANNOT be undone. Confirm?')) return;
-  const session = getSession();
-  if (!session) return;
-
-  // Remove user-scoped data
-  const prefix = `ss_user_${session.uid}_`;
-  Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => localStorage.removeItem(k));
-
-  // Remove user from users array
-  const users = JSON.parse(localStorage.getItem('ss_users') || '[]').filter(u => u.uid !== session.uid);
-  localStorage.setItem('ss_users', JSON.stringify(users));
-
-  localStorage.removeItem('ss_session');
-  showToast('Account deleted. Goodbye!', 'info');
-  setTimeout(() => window.location.href = 'auth.html', 1500);
+  try {
+    await apiDeleteAccount();
+    removeToken();
+    removeSession();
+    showToast('Account deleted. Goodbye!', 'info');
+    setTimeout(() => window.location.href = 'auth.html', 1500);
+  } catch(err) {
+    showToast(err.message || 'Could not delete account.', 'danger');
+  }
 }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const session = requireAuth();
   if (!session) return;
   applyUserGreeting();
   loadSettingsForm();
-
-  // Apply saved accent color
-  const accent = loadUserData('accentColor', null);
-  if (accent) {
-    document.documentElement.style.setProperty('--primary', accent);
-    document.querySelectorAll('.color-swatch').forEach(el => {
-      el.classList.toggle('sel', el.style.background === accent);
-    });
-  }
 });
